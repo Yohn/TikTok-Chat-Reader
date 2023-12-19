@@ -1,6 +1,6 @@
 body {
     font-family:Arial, Helvetica, sans-serif;
-    min-width: 800px;
+    /*min-width: 800px;*/
 }
 
 h1 {
@@ -21,11 +21,11 @@ a {
     font-size: 0.8em;
     font-weight: bold;
 }
-
-.usernamelink {
+.coming-soon {display:none;}
+/*.usernamelink {
     color: #18508f;
     text-decoration: none;
-}
+} */
 
 #roomUserText {
     width: 100%;
@@ -46,31 +46,25 @@ a {
 }
 
 .splitstatetable td {
-    width: 50%;
+    width: 33vw;
 }
 
-.containerheader {
-    text-align: center;
-}
-
-.chatcontainer, .giftcontainer, .eventcontainer {
+.giftcontainer, .chatcontainer, .eventcontainer {
     overflow-y: scroll;
-    height: calc(100vh - 240px);
+    height: calc(100vh - 272px);
+    word-wrap: break-word;
+}
+
+.likecontainer, .joincontainer, .sharecontainer {
+    overflow-y: scroll;
+    height: calc(45vh - 160px);
     word-wrap: break-word;
 }
 
 .eventcontainer {
-    height: calc(100vh - 90px);
+    height: calc(100vh - 120px);
 }
 
-.chatcontainer {
-    min-width: 400px;
-    max-width: calc(100vw - 430px);
-}
-
-.giftcontainer {
-    min-width: 400px;
-}
 
 .miniprofilepicture {
     height: 20px;
@@ -81,4 +75,19 @@ a {
     height: 50px;
     width: 50px;
     margin-right: 10px;
+}
+
+.chat-img-badge {
+    max-height: 20px;
+    height: 20px;
+    width: auto;
+  }
+.chat-img-emote {
+    max-height: 30px;
+    height: 30px;
+    width: auto;
+}
+.user-pop {
+    --bs-popover-max-width: 500px;
+    width: 450px;
 }
