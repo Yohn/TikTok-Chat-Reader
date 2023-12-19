@@ -1,7 +1,11 @@
 # TikTok-Chat-Reader
 A chat reader for <a href="https://www.tiktok.com/live">TikTok LIVE</a> utilizing <a href="https://github.com/zerodytrash/TikTok-Live-Connector">TikTok-Live-Connector</a> and <a href="https://socket.io/">Socket.IO</a> to forward the data to the client. This demo project uses the unofficial TikTok API to retrieve chat comments, gifts and other events from TikTok LIVE.
 
-## Demo: https://tiktok-chat-reader.zerody.one/
+### Demo: https://tiktok-chat-reader.zerody.one/
+### New demo coming soon, hosting can be used on Heroku.com
+
+## Set Up Google API
+Make sure to set up your google dev api, enable the spreadsheet api and get the json file of the api credentials in a keys.json file, and email / share your spreadsheet with the app's email it provides. That spreadsheet you shared to your app will be updated whenevrr a gift gets sent.
 
 ## Installation
 To run the chat reader locally, follow these steps:
@@ -20,4 +24,4 @@ This will use the server backend of the [demo site](https://tiktok-chat-reader.z
 
 ## Screenshot
 
-![TikTok LIVE Chat Reader (Demo)](https://user-images.githubusercontent.com/59258980/153956504-c585b14b-a50e-43f0-a994-64adcaface2e.png)
+![Screen Shot 2023-12-19 at 07 18 11-fullpage](https://github.com/Yohn/TikTok-Chat-Reader/assets/2002591/198baef0-7ef8-4679-87ab-ccb11d8804c7)
