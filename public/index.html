@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok LIVE Chat Reader (Demo)</title>
-
-    <meta name="description" content="A chat reader for TikTok LIVE utilizing TikTok-Live-Connector and Socket.IO to forward the data to the client. This demo project uses the unofficial TikTok API to retrieve chat comments, gifts and other events from TikTok LIVE.">
-    <meta name="keywords" content="TikTok,Live,Livestream,Chat,Reader,Scraper,Tracker,tiktok.com,broadcast,api,library,node,node.js,javascript">
+    <title>Yohn's TikTok Live Chat Analytics Demo Beta 1</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👻</text></svg>">
+    <meta name="description" content="A chat reader for TikTok LIVE. This demo project uses the unofficial TikTok API to retrieve chat comments, gifts and other events from TikTok LIVE.">
+    <meta name="keywords" content="TikTok,Live,Livestream,Chat,Reader,Scraper,Tracker,tiktok.com,broadcast,api,library,javascript">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+
     <link rel="stylesheet" href="style.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 
     <script src="connection.js"></script>
     <script src="app.js"></script>
@@ -33,11 +35,20 @@
 </head>
 <body>
 <div class="container-fluid">
-    <div class="head">
-        <h1>TikTok LIVE Chat Reader</h1>
+    <div class="row">
+        <div class="col-sm-12 col-md-10">
+            <h1>TikTok LIVE Chat Reader</h1>
+            <p class="m-0">Best to use on a desktop / laptop PC, and the mobile might be slower to load. This is the second beta version for the public that has been published. There will be more updates to come soon.</p>
+            <p class="m-0">This service does cost me $$ to run, and I will not know for sure how much until the end of the month.</p>
+            <p class="m-0">The estimates so far is $10-20 for the server resources, but will probably increase the more we use this. Any little bit will help keep this project going.
+            </p>
+            <p clas="m-0">This is a modified version from: <a href="https://github.com/zerodytrash/TikTok-Chat-Reader">zerodytrash/TikTok-Chat-Reader</a></p>
+            <p class="m-0 lead">CashApp: $yohnjohn84&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Venmo: @John-BrittainIII</p>
+            <p class="m-0 lead"><u>After you start your live</u>, type in your @username (without the @) on TikTok in the box below.</p>
+        </div>
     </div>
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-6 mb-3">
             <div class="input-group mb-3">
                 <span class="input-group-text">@</span>
                 <div class="form-floating">
@@ -46,23 +57,52 @@
                 </div>
 
                 <datalist id="datalistOptions">
-                    <option value="yohn.john">
-                    <option value="17queencressrose_03">
-                    <option value="valery.fine7">
-                    <option value="biarciane">
+                    <option value="yohn.john"></option>
                 </datalist>
+
+                <div class="input-group-text coming-soon">
+                    <input id="cont" class="form-check-input mt-0" type="checkbox" value="1" aria-label="Checkbox for checking when they come back online">
+                    <label for="cont" class="coming-soon" title="Coming Soon">&nbsp;&nbsp;Reconnect when online again?</label>
+                </div>
+
                 <input type="button" id="connectButton" value="connect" class="btn btn-outline-secondary">
             </div>
+            <div class="card text-bg-dark mb-3">
+                <div id="battleParties" class="card-body"></div>
+            </div>
         </div>
-        <div class="col-sm-6 text-center">
-            <div class="input-group mb-3">
+        <div class="col-sm-6 text-center mb-3">
+            <div class="d-flex justify-content-center mb-3">
+                <span id="HostInfo" class="input-group-text"></span>
+            </div>
+            <div class="d-flex justify-content-center mb-3">
                 <span id="stateText" class="input-group-text"></span>
+            </div>
+            <div class="d-flex justify-content-center">
+                <table id="top_fans"></table>
             </div>
         </div>
 
         <div class="w-100"></div>
-        <div class="col-6 text-end">
-            <div id="roomStats"></div>
+        <div class="col-sm-6 text-end">
+            <div id="roomStats">
+                <div class="input-group mb-3">
+                    <span class="input-group-text text-light" id="stats-viewers"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M1.981 8.444h20.038c.398 0 .747.264.856.648l1.105 3.904.02.139c0 .209-.127.402-.33.48l-.001.001c-.24.092-.511-.005-.635-.231l-1.144-2.071-.328 7.967c-.017.403-.347.719-.749.719h-.001c-.393 0-.716-.306-.746-.698-.068-.865-.249-2.933-.304-3.752-.022-.34-.271-.54-.541-.54-.242 0-.514.2-.537.54-.055.819-.236 2.887-.304 3.752-.03.392-.352.698-.746.698h-.001c-.402 0-.732-.316-.749-.719-.086-2.08-.435-8.736-.435-8.736h-1.669s-.349 6.656-.435 8.736c-.017.402-.347.719-.749.719h-.001c-.394 0-.716-.306-.746-.698-.068-.865-.249-2.933-.304-3.752-.023-.34-.295-.54-.537-.54h-.004c-.242 0-.515.2-.537.54-.055.819-.236 2.887-.304 3.752-.03.392-.353.698-.746.698h-.001c-.402 0-.732-.316-.749-.719-.086-2.08-.435-8.736-.435-8.736h-1.681s-.349 6.656-.435 8.736c-.017.403-.347.719-.749.719h-.001c-.394 0-.716-.306-.746-.698-.068-.865-.249-2.933-.304-3.752-.023-.34-.295-.54-.537-.54-.27 0-.519.2-.541.54-.055.819-.236 2.887-.304 3.752-.03.392-.353.698-.746.698h-.001c-.402 0-.732-.316-.749-.719l-.328-7.967-1.144 2.071c-.124.226-.395.323-.635.231l-.001-.001c-.203-.078-.33-.271-.33-.48l.02-.139 1.105-3.904c.109-.384.458-.648.856-.648zm3.019-4.444c1.104 0 2 .896 2 2s-.896 2-2 2-2-.896-2-2 .896-2 2-2zm14 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm-6.994 0c1.104 0 2 .896 2 2s-.896 2-2 2-2-.896-2-2 .896-2 2-2z"/></svg></span>
+                    <input readonly id="viewerCountStats" value="TBD" type="text" class="form-control " placeholder="0" aria-label="Viewers" aria-describedby="stats-viewers">
+                    <span class="input-group-text text-light" id="stats-likes"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M4.021 10.688c1.208.172 2.51 1.312 2.979 1.781v-10.514c0-1.08.92-1.955 2-1.955s2 .875 2 1.955v6.058c0 .784.814.885.919.103.216-1.604 2.519-1.817 2.693.399.043.546.726.655.866.027.326-1.444 2.501-1.458 2.758.758.066.579.796.696.848.034.051-.67.281-.934.607-.934 1.098 0 2.309 2.019 2.309 4.41 0 4.295-3 4.306-3 11.19h-10c-.332-3.942-3.462-7.431-6.271-10.241-.488-.488-.729-1.052-.729-1.564 0-.93.759-1.688 2.021-1.507z"/></svg></span>
+                    <input readonly id="likeCountStats" value="TBD" type="text" class="form-control" placeholder="0" aria-label="Likes" aria-describedby="stats-likes">
+                    <span class="input-group-text text-light" id="stats-viewers"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M18 1h-11.916l-6.084 7 12 15 12-14.917-6-7.083zm-3.387 8l-2.613 7.839-2.613-7.839h5.226zm-4.588-2l1.969-2.412 1.94 2.412h-3.909zm5.612-1.073l-2.354-2.927h3.33l-.976 2.927zm-7.286-.037l-.964-2.89h3.322l-2.358 2.89zm-1.738 1.11h-3.094l2.236-2.573.858 2.573zm.666 2l2.8 8.397-6.718-8.397h3.918zm9.442 0h3.975l-6.787 8.437 2.812-8.437zm.666-2l.868-2.604 2.206 2.604h-3.074z"/></svg></span>
+                    <input readonly id="diamondsCountStats" value="TBD" type="text" class="form-control" placeholder="0" aria-label="Diamonds" aria-describedby="stats-diamonds">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h4 class="dropdown-title">Top 3 Gifters</h4></li>
+                        <li id="topGiftersDivider"><p class="p3">Since the start of host's live till you connected.</p></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="battleStats" class="hide"></div>
         </div>
         <div class="col-sm-6">
             <div id="topViewers"></div>
@@ -70,74 +110,93 @@
     </div>
 
     <div class="row">
-        <div class="col-4">
+        <div class="col-12 col-sm-6 col-md-4 mb-3">
             <div class="card">
                 <h5 class="card-header">Chats</h5>
                 <ul class="list-group list-group-flush chatcontainer" id="chatcontainer"></ul>
             </div>
         </div>
-        <div class="col-8">
-            <div class="row">
-                <div class="col-6">
-                    <div class="card mb-3">
-                        <h5 class="card-header">Gifts</h5>
-                        <ul class="list-group list-group-flush giftcontainer" id="giftcontainer"></ul>
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="card mb-3">
+                <h5 class="card-header">Gifts</h5>
+                <ul class="list-group list-group-flush giftcontainer" id="giftcontainer"></ul>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 offset-sm-3 offset-md-0">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="social-lists" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-tab-pane" type="button" role="tab" aria-controls="all-tab-pane" aria-selected="true">All</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="likes-tab" data-bs-toggle="tab" data-bs-target="#likes-tab-pane" type="button" role="tab" aria-controls="likes-tab-pane" aria-selected="false">Likes</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="joins-tab" data-bs-toggle="tab" data-bs-target="#joins-tab-pane" type="button" role="tab" aria-controls="joins-tab-pane" aria-selected="false">Joins</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="excel-tab" data-bs-toggle="tab" data-bs-target="#shares-tab-pane" type="button" role="tab" aria-controls="shares-tab-pane" aria-selected="false">Shares</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="excel-tab" data-bs-toggle="tab" data-bs-target="#follows-tab-pane" type="button" role="tab" aria-controls="follows-tab-pane" aria-selected="false">Follows</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content overflow-auto" id="myTabContent2" style="max-height:30vh;height:30vh;">
+                    <div class="tab-pane fade show active" id="all-tab-pane" role="tabpanel" aria-labelledby="all-tab" tabindex="0">
+                        <ul class="list-group list-group-flush alltotalcontainer" id="alltotalcontainer"></ul>
+                    </div>
+                    <div class="tab-pane fade" id="likes-tab-pane" role="tabpanel" aria-labelledby="excel-tab" tabindex="0">
+                        <ul class="list-group list-group-flush likestotalcontainer" id="likestotalcontainer"></ul>
+                    </div>
+                    <div class="tab-pane fade" id="joins-tab-pane" role="tabpanel" aria-labelledby="joins-tab" tabindex="0">
+                        <ul class="list-group list-group-flush joinstotalcontainer" id="joinstotalcontainer"></ul>
+                    </div>
+                    <div class="tab-pane fade" id="shares-tab-pane" role="tabpanel" aria-labelledby="shares-tab" tabindex="0">
+                        <ul class="list-group list-group-flush sharestotalcontainer" id="sharestotalcontainer"></ul>
+                    </div>
+                    <div class="tab-pane fade" id="follows-tab-pane" role="tabpanel" aria-labelledby="follows-tab" tabindex="0">
+                        <ul class="list-group list-group-flush followstotalcontainer" id="followstotalcontainer"></ul>
                     </div>
                 </div>
-                <div class="col-6 mb-3">
-                    <div class="card">
-                        <h5 class="card-header">Likes</h5>
-                        <ul class="list-group list-group-flush likecontainer" id="likecontainer"></ul>
-                    </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="gifter-lists" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="gifter-tab" data-bs-toggle="tab" data-bs-target="#gifter-tab-pane" type="button" role="tab" aria-controls="gifter-tab-pane" aria-selected="true">Gifter Totals</button>
+                        </li>
+                        <li class="nav-item mx-auto">
+                            <button class="btn btn-sm btn-outline-primary float-end" id="copy-table" type="button">Copy</button>
+                            <!--&nbsp;&nbsp;
+                            <button class="btn btn-sm btn-outline-primary float-end" id="sendToGS" type="button">Send 2 GS</button> -->
+                        </li>
+                    </ul>
                 </div>
-                <div class="col-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <ul class="nav nav-tabs card-header-tabs" id="gifter-lists" role="tablist">
-                                <li class="nav-item">
-                                    <button class="nav-link active" id="gifter-tab" data-bs-toggle="tab" data-bs-target="#gifter-tab-pane" type="button" role="tab" aria-controls="gifter-tab-pane" aria-selected="true">Gifter Totals</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link" id="excel-tab" data-bs-toggle="tab" data-bs-target="#excel-tab-pane" type="button" role="tab" aria-controls="excel-tab-pane" aria-selected="false">Excel</button>
-                                </li>
-                                <li class="nav-item float-end">
-                                    <button class="btn btn-sm btn-outline-primary float-end" id="copy-table" type="button">Copy</button>
-                                </li>
-                            </ul>
+                <div class="tab-content overflow-auto" id="myTabContent" style="max-height:32vh;height:32vh;">
+                    <div class="tab-pane fade show active" id="gifter-tab-pane" role="tabpanel" aria-labelledby="gifter-tab" tabindex="0">
+                        <div class="table-responsive overflow-auto" style="max-height:30vh;height:30vh;">
+                            <textarea id="hidden" class="d-none"></textarea>
+                            <table id="gifter-table" class="table-sort table table-dark table-striped table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="col-5 text-break">Username</th>
+                                        <th class="col-5 text-break">Nickname</th>
+                                        <th class="col-2 text-break">Coins Sent</th>
+                                        <th class="d-none save">userId</th>
+                                        <th class="d-none">likes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gifter-tbody">
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="tab-content overflow-auto" id="myTabContent" style="max-height:32vh">
-                            <div class="tab-pane fade show active" id="gifter-tab-pane" role="tabpanel" aria-labelledby="gifter-tab" tabindex="0">
-                                <div class="table-responsive overflow-auto" style="max-height:32vh;">
-                                    <textarea id="hidden" class="d-none"></textarea>
-                                    <table id="gifter-table" class="table table-dark table-striped table-hover table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th class="col-5 text-truncate">Username</th>
-                                                <th class="col-5 text-truncate">Nickname</th>
-                                                <th class="col-2 text-truncate">Coins Sent</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="gifter-tbody">
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="tab-pane fade" id="excel-tab-pane" role="tabpanel" aria-labelledby="excel-tab" tabindex="0">
-                                <ul class="list-group list-group-flush giftertotalcontainer" id="giftertotalcontainer"></ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="card">
-                        <h5 class="card-header">Shares, Follows & Joins</h5>
-                        <ul class="list-group list-group-flush sharecontainer" id="sharecontainer"></ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 </body>
 </html>
