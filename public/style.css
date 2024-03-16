@@ -91,3 +91,17 @@ a {
     --bs-popover-max-width: 500px;
     width: 450px;
 }
+
+.gifter-level, .team-level {
+    background: #7f0edd;
+    font-size: 12px;
+    padding: 3px 5px 3px 2px;
+    border-radius: 5px;
+    margin:0 2px;
+}
+.gifter-level {
+    background: #2b47dd;
+}
+.team-level {
+    background: #c63311;
+}

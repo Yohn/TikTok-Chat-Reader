@@ -1,0 +1,19 @@
+{
+  "sounds": {
+    "gift": {
+      "rose": "/sounds/enchanted.wav",
+      "finger heart": "/sounds/cute-level-up.mp3",
+      "heart me": "/sounds/bruh.mp3",
+      "default": "/sounds/enchanted.wav"
+    },
+    "subscribe": "/sounds/enchanted.wav",
+    "follow": "/sounds/bruh.mp3"
+  },
+  "enabled": {
+    "gift": true,
+    "subscribe": false,
+    "follow": true
+  },
+  "firstFollowOnly": true,
+  "volume": 0.2
+}

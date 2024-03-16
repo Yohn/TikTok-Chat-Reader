@@ -17,6 +17,9 @@ let roomDisplayId = '';
 let roomDisplayNickname = '';
 let roomStart = '';
 let roomEnd = '';
+let playSounds = 1;
+let saveGifts = 1;
+
 
 function hasClass(elem, className) {
     return elem.classList.contains(className);
@@ -156,8 +159,83 @@ function timeConverter(UNIX_timestamp){
     return time;
 }
 
+let Config = {
+    updateConfig() {
+        fetch("/config.json").then((response) => response.json()).then((json) => {
+            Config = Object.assign({}, Config, json);
+        });
+    }
+}
+
+Config.updateConfig();
+
+class Announcement {
+    #soundUrl;
+    constructor(soundUrl) {
+        this.#soundUrl = soundUrl;
+    }
+    sound() {
+        if (!this.#soundUrl) {
+            return;
+        }
+        let audio = new Audio(this.#soundUrl);
+        audio.volume = Config["volume"];
+        audio.play().catch();
+    }
+}
+
+const userCog = $('#userCog')
 $(document).ready(() => {
-    $('#sendToGS').on('click', function(){
+    //$('.form-sgifts input[type="checkbox"]').on('click', function () {
+    //    saveGifts = $(this).is(':checked') ? true : false;
+    //    console.log('save gifts tapped')
+    //    console.log(saveGifts)
+    //});
+    //$('.form-ssounds input[type="checkbox"]').on('click', function () {
+    //    playSounds = $(this).is(':checked') ? true : false;
+    //    console.log('play southnds tapped')
+    //});
+    //$('.form-sgifts').on('click', function () {
+    //    //console.log('save gifts tapped')
+    //    //saveGifts = $(this)).is(':checked') ? true : false;
+    //    //saveGifts = saveGifts === 1 ? 2 : 1;
+    //    if(saveGifts === 1){ saveGifts = 2 } else { saveGifts = 1; }
+    //    //setTimeout(console.log(saveGifts), 500)
+    //    //console.log(saveGifts)
+    //});
+    //$('.form-ssounds').on('click', function () {
+    //    //console.log('play southnds tapped')
+    //    //playSounds = $(this).is(':checked') ? true : false;
+    //    if(playSounds === 1){ playSounds = 2 } else { playSounds = 1; }
+    //    //setTimeout(console.log(playSounds), 500)
+    //    //console.log(playSounds)
+    //});
+    $('#s-on').on('click', function(){
+        playSounds = 2
+        $('#s-on').addClass('d-none')
+        $('#s-off').removeClass('d-none')
+    })
+    $('#s-off').on('click', function(){
+        playSounds = 1
+        $('#s-off').addClass('d-none')
+        $('#s-on').removeClass('d-none')
+    })
+    $('#g-on').on('click', function(){
+        saveGifts = 2
+        $('#g-on').addClass('d-none')
+        $('#g-off').removeClass('d-none')
+    })
+    $('#g-off').on('click', function(){
+        saveGifts = 1
+        $('#g-off').addClass('d-none')
+        $('#g-on').removeClass('d-none')
+    })
+    $('#ch').on('click', function(){
+        console.log('playSounds = '+playSounds)
+        console.log('saveGifts = '+saveGifts)
+        console.log('------------')
+    })
+    /*$('#sendToGS').on('click', function(){
         $(this).prop('disabled', true)
         let gt = $('#gifter-table')
         gt.find('.save').removeClass('d-none')
@@ -174,11 +252,23 @@ $(document).ready(() => {
                 userId : cells[3]
             })
         }
-        $.post('./gs', obj, function(res){ // {username : 'from here', nickname : 'by me', coinsSent : 400}
-            console.log(res)
-            $(this).prop('disabled', false)
+        //$.post('./gs', obj, function(res){ // {username : 'from here', nickname : 'by me', coinsSent : 400}
+        //    console.log(res)
+        //    $(this).prop('disabled', false)
+        //})
+    }) */
+    $('#userSignUpLink').on('click', function(){
+        bootstrap.showAlert({title: "Sign Up Closed", body: "During testing phases, our sign up process will be closed. If you would like to test some new features, please contact Yohn."})
+    })
+
+    $('#userLogin').on('click', function(){
+        userCog.find('.switch-toggle').toggleClass('d-none')
+        socket.emit('userLogin', {
+            email : $('#userEmail').val(),
+            pass : $('#userPassword').val()
         })
     })
+
     $('#copy-table').on('click', function(){
         //console.log('copy btn clicked')
         let gt = $('#gifter-table')
@@ -213,9 +303,9 @@ $(document).ready(() => {
 	})
 	$('[data-bs-toggle="popover"]').popover(pops);
 })
-
 function connect() {
     let uniqueId = window.settings.username || $('#uniqueIdInput').val();
+
     if (uniqueId !== '') {
 
         $('#stateText').text('Connecting...');
@@ -229,6 +319,7 @@ function connect() {
             console.log(' -- /state --');
             //<span class="input-group-text" id="stats-viewers">Connected to roomId ${state.roomId}</span>
             roomId = state.roomId
+            // for sounds
 
             display_start = timeConverter(state.roomInfo.create_time)
             $('#HostInfo').html(`
@@ -361,12 +452,11 @@ function insertEmotes(comment, subEmotes) {
     // Loop through the emotes and splice them into the comment
     subEmotes.forEach(emoteObj => {
         const position = emoteObj.placeInComment || 0;
-        const emoteImageTag = `<img src="${emoteObj.emote.image.imageUrl}" alt="emote" class="img-fluid chat-img-emote">`;
+        const emoteImageTag = `<img src="${emoteObj.emoteImageUrl}" alt="emote" class="img-fluid chat-img-emote">`;
 
         // Insert the image tag at the specified position
         comment = comment.slice(0, position) + emoteImageTag + comment.slice(position);
     });
-
     return comment;
 }
 function addChatItem(color, data, text, cont) {
@@ -374,12 +464,64 @@ function addChatItem(color, data, text, cont) {
     //🚔 👮
     let badgeLength = data.userBadges.length
     let afterName = '';
+    let b4Name = '';
     if(badgeLength > 0){
+        /*
+            "userBadges": [
+                {
+                    "badgeSceneType": 1,
+                    "type": "pm_mt_moderator_im",
+                    "name": "Moderator"
+                },
+                {
+                    "type": "image",
+                    "badgeSceneType": 4,
+                    "displayType": 1,
+                    "url": "https://p19-webcast.tiktokcdn-us.com/webcast-oci-tx/sub_9f7d6c8e732079b1313b9c1739f98e16046390c36258920b3b048f18c3847226~tplv-obj.image"
+                },
+                {
+                    "type": "privilege",
+                    "privilegeId": "7168535897666013994",
+                    "level": 3,
+                    "badgeSceneType": 4
+                },
+                {
+                    "type": "image",
+                    "badgeSceneType": 6,
+                    "displayType": 1,
+                    "url": "https://p19-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image"
+                },
+                {
+                    "type": "privilege",
+                    "privilegeId": "7138382115758004004",
+                    "level": 38,
+                    "badgeSceneType": 8
+                },
+                {
+                    "type": "privilege",
+                    "privilegeId": "7196929090442595077",
+                    "level": 50,
+                    "badgeSceneType": 10
+                },
+                {
+                    "type": "privilege",
+                    "privilegeId": "7168535897666013994",
+                    "level": 3,
+                    "badgeSceneType": 4
+                }
+
+        */
         for(let i = 0;i<badgeLength;i++){
-            if(data.userBadges[i].name == 'Moderator'){
-                afterName += '👮';
-            } else if(data.userBadges[i].type == 'image'){
+            if(data.userBadges[i].type == 'image'){
                 afterName += '<img src="'+data.userBadges[i].url+'" class="img-fluid chat-img-badge">';
+            } else if(data.userBadges[i].name == 'Moderator'){
+                afterName += '👮';
+            } else if(data.userBadges[i].badgeSceneType == 8){
+                // gifter level
+                b4Name += '<span class="gifter-level">💎 '+data.userBadges[i].level+'</span>'
+            } else if(data.userBadges[i].badgeSceneType == 10){
+                // team level
+                b4Name += '<span class="team-level">💗 '+data.userBadges[i].level+'</span>'
             } else {
 
             }
@@ -388,7 +530,8 @@ function addChatItem(color, data, text, cont) {
     nickname = data.nickname.replace("'", "\\'")
     let isFoll = '', followInfo
     if(data && typeof data === 'object' && data.followInfo){
-        isFoll = data.followInfo.followerCount == 2 ? 'Friends' : data.followInfo.followerCount == 1 ? 'Following Host' : 'Not Following Host';
+        isFoll = data.followInfo.followStatus == 2 ? 'Friends w/ Host'
+        : data.followInfo.followStatus == 1 ? 'Following Host' : 'Not Following Host';
         followInfo = `<div class="input-group my-3">
         <span class="input-group-text w-50 text-center">${data.followInfo.followerCount} Followers</span>
         <span class="input-group-text w-50 text-center">${data.followInfo.followingCount} Following</span>
@@ -414,7 +557,7 @@ function addChatItem(color, data, text, cont) {
             </div>
             <div class="col-10 col-sm-11 d-table-cell align-middle">
                 <span>
-                    <b>${generateUsernameLink(data)}${afterName}:</b>
+                    <b>${b4Name}${generateUsernameLink(data)}${afterName}:</b>
                     <span style="color:${color}">${text}</span>
                 </span>
             </div>
@@ -578,20 +721,31 @@ function addGiftItem(data) {
             </tr>
         `)
 
-        socket.emit('addGift', {
-            giftId: data.giftId,
-            userId: data.userId,
-            giftName: data.giftName,
-            uniqueId: data.uniqueId,
-            nickname: data.nickname,
-            timestamp: data.timestamp,
-            repeatCount: data.repeatCount,
-            receiverUser: data.receiverUserId in userIds ? userIds[data.receiverUserId].nickname : '',
-            receiverUserId: data.receiverUserId,
-            diamondCount: diamondsLocal,
-            giftPictureUrl: data.giftPictureUrl,
-            profilePictureUrl: data.profilePictureUrl,
-        });
+        if(saveGifts == 1){
+            socket.emit('addGift', {
+                giftId: data.giftId,
+                userId: data.userId,
+                giftName: data.giftName,
+                uniqueId: data.uniqueId,
+                nickname: data.nickname,
+                timestamp: data.timestamp,
+                repeatCount: data.repeatCount,
+                receiverUser: data.receiverUserId in userIds ? userIds[data.receiverUserId].nickname : '',
+                receiverUserId: data.receiverUserId,
+                diamondCount: diamondsLocal,
+                giftPictureUrl: data.giftPictureUrl,
+                profilePictureUrl: data.profilePictureUrl,
+            });
+        }
+
+        let sPath = Config["sounds"]["gift"][data["giftName"].toLowerCase()] || Config["sounds"]["gift"]["default"]
+        if(playSounds == 1 && Config["enabled"]["gift"] && sPath){
+            console.log('play sound?')
+            let announcement = new Announcement(
+                sPath
+            );
+            announcement.sound();
+        }
     }
 }
 
@@ -704,6 +858,42 @@ function updateTopGifters(viewers){
 }
 
 
+
+socket.on('loginTry', (data) => {
+    userCog.find('.switch-toggle').toggleClass('d-none')
+    if(data.r == 'ok'){
+        console.log('logged in successful')
+        console.log(data)
+        console.log('/login in data')
+        let list = JSON.parse(data.info.userList)
+            , userListLen = list.length, u, usersHtml = '', userTags = '';
+        if(userListLen > 0){
+            for(u=0;u<userListLen;u++){
+                usersHtml += '<option value="'+list[u]+'"></option>';
+            }
+            $('#datalistOptions').html(usersHtml);
+        }
+        $('#settingLoginLi').html(`<li>
+            <a class="dropdown-item" href="#" id="moAutofillHost">Autofill Hosts</a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="#" id="moNotes">Notes Hosts</a>
+        </li>`)//addClass('d-none').after(data.replaceForm)
+        //$('#settingLoginLi')
+        //    created: "12/21/2023 4:24:59"
+        //    email: "yohns@live.com"
+        //    keyFile: "Some key file"
+        //    lastLogin: ""
+        //    name: "Yohn"
+        //    premiumUntil: ""
+        //    sheetId: "",
+        //    sounds: '{"rose":"rose"}',
+        //    userList: '{"yohn.john", "dancehallwifi", "aviannaav", "imanalyn31"}'*/
+        console.log(data)
+    } else {
+        console.log('could not login.')
+    }
+})
 
 // viewer stats
 connection.on('roomUser', (msg) => {
@@ -823,8 +1013,98 @@ connection.on('chat', (msg) => {
     console.log('-- chat --')
     if (window.settings.showChats === "0") return;
 
-    let msgcom = msg.hasOwnProperty('subemotes') ? insertEmotes(sanitize(msg.comment), msg.subemotes) : sanitize(msg.comment);
+    //let msgcom = msg.hasOwnProperty('subemotes') ? insertEmotes(sanitize(msg.comment), msg.subemotes) : sanitize(msg.comment);
+    let msgcom = insertEmotes(sanitize(msg.comment), msg.emotes);
     addChatItem('', msg, msgcom, '.chatcontainer');
+    /*
+    {
+  "emotes": [],
+  "comment": "why",
+  "userId": "7182427000643470382",
+  "secUid": "MS4wLjABAAAAQJ87hquuBeJBWaRFzdYItDVN0U0iFmjTR5Ppa-jUTaIb3hPN1-PHhT7atV3nem9R",
+  "uniqueId": "garrett052",
+  "nickname": "Garrett",
+  "profilePictureUrl": "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=YZtZ2%2FPQdqKVYSpqVl2o8%2BQG6vI%3D",
+  "followRole": 2,
+  "userBadges": [
+    {
+      "badgeSceneType": 1,
+      "type": "pm_mt_moderator_im",
+      "name": "Moderator"
+    },
+    {
+      "type": "image",
+      "badgeSceneType": 4,
+      "displayType": 1,
+      "url": "https://p19-webcast.tiktokcdn-us.com/webcast-oci-tx/sub_9f7d6c8e732079b1313b9c1739f98e16046390c36258920b3b048f18c3847226~tplv-obj.image"
+    },
+    {
+      "type": "privilege",
+      "privilegeId": "7168535897666013994",
+      "level": 3,
+      "badgeSceneType": 4
+    },
+    {
+      "type": "image",
+      "badgeSceneType": 6,
+      "displayType": 1,
+      "url": "https://p19-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image"
+    },
+    {
+      "type": "privilege",
+      "privilegeId": "7138382115758004004",
+      "level": 38,
+      "badgeSceneType": 8
+    },
+    {
+      "type": "privilege",
+      "privilegeId": "7196929090442595077",
+      "level": 50,
+      "badgeSceneType": 10
+    },
+    {
+      "type": "privilege",
+      "privilegeId": "7168535897666013994",
+      "level": 3,
+      "badgeSceneType": 4
+    }
+  ],
+  "userSceneTypes": [
+    1,
+    4,
+    6,
+    8,
+    10,
+    4,
+    6,
+    1
+  ],
+  "userDetails": {
+    "createTime": "0",
+    "bioDescription": "",
+    "profilePictureUrls": [
+      "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~tplv-tiktok-shrink:72:72.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=HtArrDWG3VOmeyqq1FToFoS7FvM%3D",
+      "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=YZtZ2%2FPQdqKVYSpqVl2o8%2BQG6vI%3D",
+      "https://p19-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=UsTL8J6rW6xc6uov%2FniCCPVBkSk%3D",
+      "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.jpeg?lk3s=a5d48078&x-expires=1706238000&x-signature=cZWF5gCH0Xs61dYCABe1NLLu%2FJs%3D"
+    ]
+  },
+  "followInfo": {
+    "followingCount": 156,
+    "followerCount": 1412,
+    "followStatus": 2,
+    "pushStatus": 0
+  },
+  "isModerator": true,
+  "isNewGifter": false,
+  "isSubscriber": true,
+  "topGifterRank": null,
+  "gifterLevel": 38,
+  "teamMemberLevel": 50,
+  "msgId": "7327498468313058090",
+  "createTime": "1706066195334"
+}
+    */
 })
 
 // New gift received
@@ -1076,10 +1356,10 @@ connection.on('subscribe', (data) => {
 connection.on('streamEnd', (actionId) => {
     let msg = 'Stream Ended';
     if (actionId === 3) {
-        let msg = 'Stream ended by user';
+        msg = 'Stream ended by user';
     }
     if (actionId === 4) {
-        let msg = 'Stream ended by platform moderator (ban)';
+        msg = 'Stream ended by platform moderator (ban)';
     }
     //let tim = Date.now();
     //var a = new Date(roomStart * 1000);
@@ -1098,3 +1378,8 @@ connection.on('streamEnd', (actionId) => {
         }, 30000);
     }
 })
+
+window.addEventListener("beforeunload", function (e) {
+    e.preventDefault();
+    e.returnValue = ""
+});
