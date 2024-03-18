@@ -20,6 +20,7 @@ let roomEnd = '';
 let playSounds = 1;
 let saveGifts = 1;
 
+let ttn = [];
 
 function hasClass(elem, className) {
     return elem.classList.contains(className);
@@ -186,30 +187,6 @@ class Announcement {
 
 const userCog = $('#userCog')
 $(document).ready(() => {
-    //$('.form-sgifts input[type="checkbox"]').on('click', function () {
-    //    saveGifts = $(this).is(':checked') ? true : false;
-    //    console.log('save gifts tapped')
-    //    console.log(saveGifts)
-    //});
-    //$('.form-ssounds input[type="checkbox"]').on('click', function () {
-    //    playSounds = $(this).is(':checked') ? true : false;
-    //    console.log('play southnds tapped')
-    //});
-    //$('.form-sgifts').on('click', function () {
-    //    //console.log('save gifts tapped')
-    //    //saveGifts = $(this)).is(':checked') ? true : false;
-    //    //saveGifts = saveGifts === 1 ? 2 : 1;
-    //    if(saveGifts === 1){ saveGifts = 2 } else { saveGifts = 1; }
-    //    //setTimeout(console.log(saveGifts), 500)
-    //    //console.log(saveGifts)
-    //});
-    //$('.form-ssounds').on('click', function () {
-    //    //console.log('play southnds tapped')
-    //    //playSounds = $(this).is(':checked') ? true : false;
-    //    if(playSounds === 1){ playSounds = 2 } else { playSounds = 1; }
-    //    //setTimeout(console.log(playSounds), 500)
-    //    //console.log(playSounds)
-    //});
     $('#s-on').on('click', function(){
         playSounds = 2
         $('#s-on').addClass('d-none')
@@ -231,32 +208,22 @@ $(document).ready(() => {
         $('#g-on').removeClass('d-none')
     })
     $('#ch').on('click', function(){
+        fetch("/tt-usernames.json").then((response) => response.json()).then((json) => {
+            //ttn = Object.assign({}, [], json);
+            //console.log(ttn)
+            //let h, hl = ttn.length,sels
+            let datalist = document.getElementById('datalistOptions');
+            for(const item of json) datalist.appendChild(new Option(item,item));
+            //json.forEach(na => datalist.appendChild(new Option('', na)))
+            //for(h=0;h<hl;h++){
+            //    sels += '<option value="'+ttn[h]+'"></option>';
+            //}
+            //datalistOptions.html(sels)
+        });
         console.log('playSounds = '+playSounds)
         console.log('saveGifts = '+saveGifts)
         console.log('------------')
     })
-    /*$('#sendToGS').on('click', function(){
-        $(this).prop('disabled', true)
-        let gt = $('#gifter-table')
-        gt.find('.save').removeClass('d-none')
-        let rows = gt.html().split("\n"), rowLength = rows.length, a //, fin = text.split("\t")
-        let obj = []
-        let date2 = new Date();
-        for(a=0;a<rowLength;a++){
-            let cells = rows[a].split("\t")
-            obj.push({
-                dat : date2.getMonth()+'/'+date2.getDay()+'/'+date2.getFullYear(),
-                username : cells[0],
-                nickname : cells[1],
-                coinsSent : cells[2],
-                userId : cells[3]
-            })
-        }
-        //$.post('./gs', obj, function(res){ // {username : 'from here', nickname : 'by me', coinsSent : 400}
-        //    console.log(res)
-        //    $(this).prop('disabled', false)
-        //})
-    }) */
     $('#userSignUpLink').on('click', function(){
         bootstrap.showAlert({title: "Sign Up Closed", body: "During testing phases, our sign up process will be closed. If you would like to test some new features, please contact Yohn."})
     })
@@ -858,6 +825,9 @@ function updateTopGifters(viewers){
 }
 
 
+//socket.on('readUsernames', (data) => {
+//    console.log(data)
+//})
 
 socket.on('loginTry', (data) => {
     userCog.find('.switch-toggle').toggleClass('d-none')
@@ -891,7 +861,7 @@ socket.on('loginTry', (data) => {
         //    userList: '{"yohn.john", "dancehallwifi", "aviannaav", "imanalyn31"}'*/
         console.log(data)
     } else {
-        console.log('could not login.')
+        console.log('could not login - 1')
     }
 })
 

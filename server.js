@@ -5,6 +5,8 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { TikTokConnectionWrapper, getGlobalConnectionCount } = require('./connectionWrapper');
 const { clientBlocked } = require('./limiter');
+//const { updateUsernames, readUsernames } = require('./tt-usernames');
+
 const {google} = require('googleapis');
 // setting up google apis
 // https://medium.com/@shkim04/beginner-guide-on-google-sheet-api-for-node-js-4c0b533b071a
@@ -272,12 +274,22 @@ io.on('connection', (socket) => {
 
         //response.send("Gift Saved!")
     })
+    socket.on('readUsernames', async (data) => {
+        //response.send(readUsernames())
+        socket.emit('readUsernames', {
+            names : readUsernames()
+        });
+    })
 });
 
 // Emit global connection statistics
 setInterval(() => {
     io.emit('statistic', { globalConnectionCount: getGlobalConnectionCount() });
 }, 5000)
+
+function testing(what){
+    console.log(what)
+}
 
 // Serve frontend files
 app.use(express.static('public'));
