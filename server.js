@@ -294,6 +294,8 @@ function testing(what){
 // Serve frontend files
 app.use(express.static('public'));
 
+
+
 // Start http listener
 const port = process.env.PORT || 8081;
 httpServer.listen(port);
