@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "dotenv": "^16.3.1",
+    "edit-json-file": "^1.8.0",
     "express": "^4.18.2",
     "googleapis": "^74.1.0",
     "socket.io": "^4.7.2",

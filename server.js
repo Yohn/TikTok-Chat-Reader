@@ -6,14 +6,19 @@ const { Server } = require('socket.io');
 const { TikTokConnectionWrapper, getGlobalConnectionCount } = require('./connectionWrapper');
 const { clientBlocked } = require('./limiter');
 //const { updateUsernames, readUsernames } = require('./tt-usernames');
-
+const editJsonFile = require("edit-json-file");
 const {google} = require('googleapis');
+
+var fs = require('fs');
+
 // setting up google apis
 // https://medium.com/@shkim04/beginner-guide-on-google-sheet-api-for-node-js-4c0b533b071a
 // https://github.com/googleworkspace/browser-samples/tree/main/sheets/snippets
 const app = express();
 const httpServer = createServer(app);
 app.use(express.urlencoded({ extended: true }));
+
+let file = editJsonFile(`${__dirname}/public/config.json`);
 
 // Enable cross origin resource sharing
 const io = new Server(httpServer, {
@@ -274,12 +279,52 @@ io.on('connection', (socket) => {
 
         //response.send("Gift Saved!")
     })
-    socket.on('readUsernames', async (data) => {
-        //response.send(readUsernames())
-        socket.emit('readUsernames', {
-            names : readUsernames()
+
+    var sounds = fs.readdirSync('public/sounds/');
+    socket.emit('soundDirectory', {
+        r : 'done',
+        files : sounds
+    });
+
+    socket.on('addToNames', async (data) => {
+        let dname = data.name
+        //file.set('sounds.'+dname, 'somestr')
+        file.append('names', dname)
+        file.save();
+        socket.emit('addToNames', {
+            r : 'done',
+            name : dname
         });
     })
+    socket.on('removeNames', async (data) => {
+        let dname = data.name, list = file.get('names'),
+            list_len = list.length, i, ob = []
+        //file.set('sounds.'+dname, 'somestr')
+        file.set('names', undefined)
+        //console.log(data)
+        //console.log('remove - '+dname)
+        for(i=0;i<list_len;i++){
+            if(list[i] == dname){
+                //console.log('found -- '+list[i])
+            } else {
+                //console.log('--'+list[i])
+                ob.push(list[i])
+            }
+        }
+        //console.log(ob)
+        file.set('names', ob)
+        file.save();
+        socket.emit('removeNames', {
+            r : 'done',
+            name : dname
+        });
+    })
+    //socket.on('readUsernames', async (data) => {
+    //    //response.send(readUsernames())
+    //    socket.emit('readUsernames', {
+    //        names : readUsernames()
+    //    });
+    //})
 });
 
 // Emit global connection statistics
@@ -287,14 +332,8 @@ setInterval(() => {
     io.emit('statistic', { globalConnectionCount: getGlobalConnectionCount() });
 }, 5000)
 
-function testing(what){
-    console.log(what)
-}
-
 // Serve frontend files
 app.use(express.static('public'));
-
-
 
 // Start http listener
 const port = process.env.PORT || 8081;

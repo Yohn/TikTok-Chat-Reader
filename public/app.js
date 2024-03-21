@@ -185,8 +185,60 @@ class Announcement {
     }
 }
 
+function removeName(th){
+    let th2 = $(th), name = th2.data('name')
+    socket.emit('removeNames', {
+        name : name
+    })
+
+}
+
 const userCog = $('#userCog')
 $(document).ready(() => {
+    fetch("/config.json").then((response) => response.json()).then((json) => {
+        let datalist = document.getElementById('datalistOptions');
+        //let nameList = document.getElementById('name-list');
+        let html = '', gsound = ''
+        for(const item of json['names']){
+            datalist.appendChild(new Option(item,item));
+            html += `<li data-list-name="${item}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                ${item}
+                <span class="badge text-bg-primary rounded-pill c-pointer"
+                    data-name="${item}" onclick="removeName(this)">🗑️</span>
+            </li>`
+        }
+        $('#name-list').html(html)
+        for(const sou of json['sounds']['gifts']){
+            gsound =+ `<li data-list-name="${sou}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            ${sou}
+            <span class="badge text-bg-primary rounded-pill c-pointer"
+                data-url="${json['sounds']['gifts'][sou]}"
+                onclick="playSound(this)">
+                <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
+                <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
+            </span>
+            <span class="badge text-bg-primary rounded-pill c-pointer"
+                data-name="${sou}" onclick="removeGift(this)">
+                🗑️
+            </span>
+        </li>`
+        }
+        $('#gift-list').html(gsound)
+    });
+    $('#add-username').on('click', function(){
+        let name = $('#new-username'), uname = name.val()
+        if(uname == ''){
+            // make error
+            name.addClass('is-invalid')
+        } else {
+            name.removeClass('is-invalid')
+            socket.emit('addToNames', {
+                name : uname
+            })
+        }
+    })
     $('#s-on').on('click', function(){
         playSounds = 2
         $('#s-on').addClass('d-none')
@@ -208,18 +260,10 @@ $(document).ready(() => {
         $('#g-on').removeClass('d-none')
     })
     $('#ch').on('click', function(){
-        fetch("/tt-usernames.json").then((response) => response.json()).then((json) => {
-            //ttn = Object.assign({}, [], json);
-            //console.log(ttn)
-            //let h, hl = ttn.length,sels
-            let datalist = document.getElementById('datalistOptions');
-            for(const item of json) datalist.appendChild(new Option(item,item));
-            //json.forEach(na => datalist.appendChild(new Option('', na)))
-            //for(h=0;h<hl;h++){
-            //    sels += '<option value="'+ttn[h]+'"></option>';
-            //}
-            //datalistOptions.html(sels)
-        });
+
+        socket.emit('addToNames', {
+            name : 'another name'
+        })
         console.log('playSounds = '+playSounds)
         console.log('saveGifts = '+saveGifts)
         console.log('------------')
@@ -829,6 +873,22 @@ function updateTopGifters(viewers){
 //    console.log(data)
 //})
 
+socket.on('addToNames', (data) => {
+    console.log('-----addToNames return-----')
+    console.log(data)
+    console.log('-----addToNames return-----')
+})
+socket.on('removeNames', (data) => {
+    console.log('-----removeNames return-----')
+    console.log(data)
+    console.log('-----removeNames return-----')
+    $('li[data-list-name="'+data.name+'"]').slideUp('fast', function(){$(this).remove();})
+})
+socket.on('soundDirectory', (data) => {
+    console.log('-----soundDirectory return-----')
+    console.log(data)
+    console.log('-----soundDirectory return-----')
+})
 socket.on('loginTry', (data) => {
     userCog.find('.switch-toggle').toggleClass('d-none')
     if(data.r == 'ok'){
