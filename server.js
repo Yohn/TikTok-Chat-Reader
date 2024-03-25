@@ -285,7 +285,20 @@ io.on('connection', (socket) => {
         r : 'done',
         files : sounds
     });
-
+    socket.on('saveNote', async (data) => {
+        let msg = ''
+        if(data.id == 'new'){
+            file.append('notes.'+data.name, data.note)
+            msg = 'New Note Saved!'
+        } else {
+            file.set('notes.'+data.id, data.note)
+            msg = 'Note Updated!'
+        }
+        file.save();
+        socket.emit('saveNote', {
+            r : `<div class="alert alert-secondary mt-3" role="alert">${msg}</div>`
+        });
+    })
     socket.on('addToNames', async (data) => {
         let dname = data.name
         //file.set('sounds.'+dname, 'somestr')

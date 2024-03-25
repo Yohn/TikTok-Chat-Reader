@@ -160,10 +160,58 @@ function timeConverter(UNIX_timestamp){
     return time;
 }
 
+function loadNote(title){ // , note
+    let box = Array.isArray(Config.notes[title]) ? Config.notes[title][0] : Config.notes[title]
+    $('#note-id').val(title)
+    $('#new-note-name').val(title)
+    //$('#new-note-info').val(note.replace("<br>", "\n"))
+    $('#new-note-info').val(box.replace("<br>", "\n"))
+    $('#new-note-form').collapse('show')
+}
+
 let Config = {
     updateConfig() {
         fetch("/config.json").then((response) => response.json()).then((json) => {
             Config = Object.assign({}, Config, json);
+            let datalist = document.getElementById('datalistOptions');
+            datalist.innerHTML = ''
+            //let nameList = document.getElementById('name-list');
+            let html = '', gsound = '', notes = ''
+            for(const item of json['names']){
+                datalist.appendChild(new Option(item,item));
+                html += `<li data-list-name="${item}"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    ${item}
+                    <span class="badge text-bg-primary rounded-pill c-pointer"
+                        data-name="${item}" onclick="removeName(this)">🗑️</span>
+                </li>`
+            }
+            $('#name-list').html(html)
+            for(const note in json['notes']){
+                console.log(note)
+                let no1 = Array.isArray(json['notes'][note]) ? json['notes'][note][0] : json['notes'][note];
+                notes += `<button type="button" class="m-2 btn btn-outline-secondary"
+                    onclick="loadNote('${note}')">${note}</a>`
+                    // , '${no1.replace("\n", "<br>").replace("'", "\'")}'
+            }
+            $('#note-list').html(notes)
+            for(const sou of json['sounds']['gift']){
+                gsound += `<li data-list-name="${sou}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                ${sou}
+                <span class="badge text-bg-primary rounded-pill c-pointer"
+                    data-url="${json['sounds']['gifts'][sou]}"
+                    onclick="playSound(this)">
+                    <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
+                    <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
+                </span>
+                <span class="badge text-bg-primary rounded-pill c-pointer"
+                    data-name="${sou}" onclick="removeGift(this)">
+                    🗑️
+                </span>
+                </li>`
+            }
+            $('#gift-list').html(gsound)
         });
     }
 }
@@ -195,38 +243,63 @@ function removeName(th){
 
 const userCog = $('#userCog')
 $(document).ready(() => {
-    fetch("/config.json").then((response) => response.json()).then((json) => {
-        let datalist = document.getElementById('datalistOptions');
-        //let nameList = document.getElementById('name-list');
-        let html = '', gsound = ''
-        for(const item of json['names']){
-            datalist.appendChild(new Option(item,item));
-            html += `<li data-list-name="${item}"
-                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                ${item}
-                <span class="badge text-bg-primary rounded-pill c-pointer"
-                    data-name="${item}" onclick="removeName(this)">🗑️</span>
-            </li>`
+    $('#new-note').on('click', function(){
+        $('#note-id').val('new')
+        $('#new-note-name').val('')
+        $('#new-note-info').val('')
+        $('#new-note-form').collapse('show')
+    })
+    $('#save-note').on('click', function(){
+        let id = $('#note-id').val(),
+        name = $('#new-note-name'),
+        info = $('#new-note-info'),
+        error = false,
+        box = ''
+        if(name.val() == ''){
+            error = true
+            name.addClass('is-invalid')
+        } else {
+            name.removeClass('is-invalid')
         }
-        $('#name-list').html(html)
-        for(const sou of json['sounds']['gifts']){
-            gsound =+ `<li data-list-name="${sou}"
-            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-            ${sou}
-            <span class="badge text-bg-primary rounded-pill c-pointer"
-                data-url="${json['sounds']['gifts'][sou]}"
-                onclick="playSound(this)">
-                <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
-                <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
-            </span>
-            <span class="badge text-bg-primary rounded-pill c-pointer"
-                data-name="${sou}" onclick="removeGift(this)">
-                🗑️
-            </span>
-        </li>`
+        if(name.val() == 'new'){
+            error = true
+            name.addClass('is-invalid')
         }
-        $('#gift-list').html(gsound)
-    });
+        if(info.val() == ''){
+            error = true
+            info.addClass('is-invalid')
+        } else {
+            info.removeClass('is-invalid')
+        }
+        if(error == false){
+            let na2 = name.val().replace("'", "\'").replace('"', '\"')
+                , no2 = info.val()
+            socket.emit('saveNote', {
+                id: id,
+                name: na2,
+                note: no2
+            })
+            if(id == 'new'){
+                $('#note-list').html(`<button type="button" class="m-2 btn btn-outline-secondary"'
+                    +'onclick="loadNote('${na2}')">${na2}</button>
+                    ${$('#note-list').html()}`
+                // , \''+no2.replace("<br>", "\n")+'\'
+                )
+            } else {
+                //$(`#note-list button[onclick="loadNote('${na2}')]`)
+            }
+            $('#new-note-form').collapse('hide')
+            $('#note-id').val('new')
+            $('#new-note-name').val('')
+            $('#new-note-info').val('')
+            Config.updateConfig();
+            //if(Array.isArray(json['notes'][note])){
+            //    box = json['notes'][note][0].replace("'", "\'")
+            //} else {
+            //    box = json['notes'][note].replace("'", "\'")
+            //}
+        }
+    })
     $('#add-username').on('click', function(){
         let name = $('#new-username'), uname = name.val()
         if(uname == ''){
@@ -873,6 +946,13 @@ function updateTopGifters(viewers){
 //    console.log(data)
 //})
 
+socket.on('saveNote', (data) => {
+    $('#note-results').html(data.r).collapse('show')
+    setTimeout(function(){
+        $('#note-results').collapse('hide')
+    }, 5000)
+    Config.updateConfig();
+})
 socket.on('addToNames', (data) => {
     console.log('-----addToNames return-----')
     console.log(data)
@@ -886,6 +966,24 @@ socket.on('removeNames', (data) => {
 })
 socket.on('soundDirectory', (data) => {
     console.log('-----soundDirectory return-----')
+    let list = '';
+    for(const sound in data.name){
+        document.getElementById('group-sound').appendChild(new Option(sound,sound))
+    //    list += `<li data-list-name="${sound}"
+    //    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+    //    ${sound}
+    //    <span class="badge text-bg-primary rounded-pill c-pointer"
+    //        data-url="${sound}"
+    //        onclick="playSound(this)">
+    //        <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
+    //        <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
+    //    </span>
+    //    <span class="badge text-bg-primary rounded-pill c-pointer"
+    //        data-name="${sound}" onclick="removeGift(this)">
+    //        🗑️
+    //    </span>
+    //</li>`
+    }
     console.log(data)
     console.log('-----soundDirectory return-----')
 })
