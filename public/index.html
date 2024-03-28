@@ -303,14 +303,16 @@
             </div>
             <div class="modal-body">
                 <div class="input-group mb-3">
-                    <label class="input-group-text" for="group-gift">Gift:</label>
-                    <select class="form-select" id="group-gift" name="group-gift"></select>
                     <label class="input-group-text" for="group-sound">Sound:</label>
                     <select class="form-select" id="group-sound" name="group-sound"></select>
-                    <button class="btn btn-outline-secondary" type="button" id="save-gift-sound">Save</button>
+                    <button class="btn btn-outline-secondary" type="button" id="play-gift-sound">Play</button>
+                    <label class="input-group-text" for="group-gift">Gift:</label>
+                    <select class="form-select" id="group-gift" name="group-gift"></select>
+                    <button class="btn btn-outline-primary" type="button" id="save-gift-sound">Save</button>
                 </div>
                 <ul class="list-group" id="gift-list">
                 </ul>
+                <div id="sounds"></div>
             </div>
             <div class="modal-footer flex-nowrap p-0">
                 <button type="button" class="btn btn-lg btn-dark fs-6 text-decoration-none col-6 py-3 m-0 rounded-0 border-end" data-bs-dismiss="modal">Close</button>

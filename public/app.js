@@ -170,50 +170,85 @@ function loadNote(title){ // , note
 }
 
 let Config = {
-    updateConfig() {
+
+    buildNames(json){
+        let datalist = document.getElementById('datalistOptions');
+        datalist.innerHTML = ''
+        //let nameList = document.getElementById('name-list');
+        let html = '', gsound = '', notes = ''
+        for(const item of json['names']){
+            datalist.appendChild(new Option(item,item));
+            html += `<li data-list-name="${item}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                ${item}
+                <span class="badge text-bg-primary rounded-pill c-pointer"
+                    data-name="${item}" onclick="removeName(this)">🗑️</span>
+            </li>`
+        }
+        $('#name-list').html(html)
+    },
+
+    buildNotes(json){
+        let notes = ''
+        for(const note in json['notes']){
+            console.log(note)
+            notes += `<button type="button" class="m-2 btn btn-outline-secondary"
+                onclick="loadNote('${note}')">${note}</a>`
+                // , '${no1.replace("\n", "<br>").replace("'", "\'")}'
+        }
+        $('#note-list').html(notes)
+    },
+
+    buildSounds(json){
+        let gsound = '' //, i, count = json['sounds']['gift'].length
+        for(const sou of json['sounds']['gift']){
+        //for(i=0;i < count; i++){
+            gsound += `<li data-list-name="${sou}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            ${sou}
+            <span class="badge text-bg-primary rounded-pill c-pointer"
+                data-url="${json['sounds']['gifts'][sou]}"
+                onclick="playSound(this)">
+                <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
+                <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
+            </span>
+            <span class="badge text-bg-primary rounded-pill c-pointer"
+                data-name="${sou}" onclick="removeGift(this)">
+                🗑️
+            </span>
+            </li>`
+        }
+        $('#gift-list').html(gsound)
+    },
+
+    grabConfig(ups){
         fetch("/config.json").then((response) => response.json()).then((json) => {
             Config = Object.assign({}, Config, json);
-            let datalist = document.getElementById('datalistOptions');
-            datalist.innerHTML = ''
-            //let nameList = document.getElementById('name-list');
-            let html = '', gsound = '', notes = ''
-            for(const item of json['names']){
-                datalist.appendChild(new Option(item,item));
-                html += `<li data-list-name="${item}"
-                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    ${item}
-                    <span class="badge text-bg-primary rounded-pill c-pointer"
-                        data-name="${item}" onclick="removeName(this)">🗑️</span>
-                </li>`
+            if(ups == 'all'){
+                Config.buildNames(json)
+                Config.buildNotes(json)
+                Config.buildSounds(json)
+            } else if(ups == 'names'){
+                Config.buildNames(json)
+            } else if(ups == 'notes'){
+                Config.buildNotes(json)
+            } else if(ups == 'sounds'){
+                Config.buildSounds(json)
             }
-            $('#name-list').html(html)
-            for(const note in json['notes']){
-                console.log(note)
-                let no1 = Array.isArray(json['notes'][note]) ? json['notes'][note][0] : json['notes'][note];
-                notes += `<button type="button" class="m-2 btn btn-outline-secondary"
-                    onclick="loadNote('${note}')">${note}</a>`
-                    // , '${no1.replace("\n", "<br>").replace("'", "\'")}'
-            }
-            $('#note-list').html(notes)
-            for(const sou of json['sounds']['gift']){
-                gsound += `<li data-list-name="${sou}"
-                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                ${sou}
-                <span class="badge text-bg-primary rounded-pill c-pointer"
-                    data-url="${json['sounds']['gifts'][sou]}"
-                    onclick="playSound(this)">
-                    <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
-                    <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
-                </span>
-                <span class="badge text-bg-primary rounded-pill c-pointer"
-                    data-name="${sou}" onclick="removeGift(this)">
-                    🗑️
-                </span>
-                </li>`
-            }
-            $('#gift-list').html(gsound)
         });
+    },
+
+    updateConfig() {
+        Config.grabConfig('all')
+        //fetch("/config.json").then((response) => response.json()).then((json) => {
+        //    Config = Object.assign({}, Config, json);
+        //    Config.buildNames(json)
+        //    Config.buildNotes(json)
+        //    Config.buildSounds(json)
+        //});
     }
+
+
 }
 
 Config.updateConfig();
@@ -243,6 +278,13 @@ function removeName(th){
 
 const userCog = $('#userCog')
 $(document).ready(() => {
+    $('#play-gift-sound').on('click', () => {
+        let sfile = $('#group-sound').val()
+        let announcement = new Announcement(
+            '/sounds/'+sfile
+        );
+        announcement.sound();
+    })
     $('#new-note').on('click', function(){
         $('#note-id').val('new')
         $('#new-note-name').val('')
@@ -390,6 +432,12 @@ $(document).ready(() => {
 function connect() {
     let uniqueId = window.settings.username || $('#uniqueIdInput').val();
 
+    if(!Config['names'][uniqueId]){
+        socket.emit('addToNames', {
+            name : uniqueId
+        })
+    }
+
     if (uniqueId !== '') {
 
         $('#stateText').text('Connecting...');
@@ -446,7 +494,8 @@ function connect() {
             diamondsCount = 0;
             updateRoomStats();
 
-            let g_length = state.availableGifts.length, ii, allGifts = [], html = '';
+            let g_length = state.availableGifts.length, ii, allGifts = [], html = ''
+            , giftDrop = '';
             for(ii=0;ii<g_length;ii++){
                 let list = {
                     id: state.availableGifts[ii].id,
@@ -457,8 +506,13 @@ function connect() {
                     url: state.availableGifts[ii].icon.url_list[0],
                 }
                 allGifts.push(list) //state.availableGifts[i]
+                giftDrop += '<option value="'+state.availableGifts[ii].name+'">'
+                    +state.availableGifts[ii].name+' ('+state.availableGifts[ii].diamond_count+') coins'
+                    +'</option>'
             }
-            sendToDb('gifts', 'check', allGifts)
+            console.log(allGifts)
+            $('#group-gift').html(giftDrop)
+            //sendToDb('gifts', 'check', allGifts)
 
             if(roomDisplayId in usernames){} else {
                 usernames[roomDisplayId] = {
@@ -956,6 +1010,12 @@ socket.on('saveNote', (data) => {
 socket.on('addToNames', (data) => {
     console.log('-----addToNames return-----')
     console.log(data)
+    $('#name-list').prepend(`<li data-list-name="${data.name}"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        ${data.name}
+        <span class="badge text-bg-primary rounded-pill c-pointer"
+        data-name="${data.name}" onclick="removeName(this)">🗑️</span>
+    </li>`)
     console.log('-----addToNames return-----')
 })
 socket.on('removeNames', (data) => {
@@ -965,27 +1025,9 @@ socket.on('removeNames', (data) => {
     $('li[data-list-name="'+data.name+'"]').slideUp('fast', function(){$(this).remove();})
 })
 socket.on('soundDirectory', (data) => {
-    console.log('-----soundDirectory return-----')
-    let list = '';
-    for(const sound in data.name){
-        document.getElementById('group-sound').appendChild(new Option(sound,sound))
-    //    list += `<li data-list-name="${sound}"
-    //    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-    //    ${sound}
-    //    <span class="badge text-bg-primary rounded-pill c-pointer"
-    //        data-url="${sound}"
-    //        onclick="playSound(this)">
-    //        <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
-    //        <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
-    //    </span>
-    //    <span class="badge text-bg-primary rounded-pill c-pointer"
-    //        data-name="${sound}" onclick="removeGift(this)">
-    //        🗑️
-    //    </span>
-    //</li>`
+    for(const sound in data.files){
+        $('#group-sound').append(`<option value="${data.files[sound]}">${data.files[sound]}</option>`)
     }
-    console.log(data)
-    console.log('-----soundDirectory return-----')
 })
 socket.on('loginTry', (data) => {
     userCog.find('.switch-toggle').toggleClass('d-none')
@@ -1144,95 +1186,6 @@ connection.on('chat', (msg) => {
     //let msgcom = msg.hasOwnProperty('subemotes') ? insertEmotes(sanitize(msg.comment), msg.subemotes) : sanitize(msg.comment);
     let msgcom = insertEmotes(sanitize(msg.comment), msg.emotes);
     addChatItem('', msg, msgcom, '.chatcontainer');
-    /*
-    {
-  "emotes": [],
-  "comment": "why",
-  "userId": "7182427000643470382",
-  "secUid": "MS4wLjABAAAAQJ87hquuBeJBWaRFzdYItDVN0U0iFmjTR5Ppa-jUTaIb3hPN1-PHhT7atV3nem9R",
-  "uniqueId": "garrett052",
-  "nickname": "Garrett",
-  "profilePictureUrl": "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=YZtZ2%2FPQdqKVYSpqVl2o8%2BQG6vI%3D",
-  "followRole": 2,
-  "userBadges": [
-    {
-      "badgeSceneType": 1,
-      "type": "pm_mt_moderator_im",
-      "name": "Moderator"
-    },
-    {
-      "type": "image",
-      "badgeSceneType": 4,
-      "displayType": 1,
-      "url": "https://p19-webcast.tiktokcdn-us.com/webcast-oci-tx/sub_9f7d6c8e732079b1313b9c1739f98e16046390c36258920b3b048f18c3847226~tplv-obj.image"
-    },
-    {
-      "type": "privilege",
-      "privilegeId": "7168535897666013994",
-      "level": 3,
-      "badgeSceneType": 4
-    },
-    {
-      "type": "image",
-      "badgeSceneType": 6,
-      "displayType": 1,
-      "url": "https://p19-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image"
-    },
-    {
-      "type": "privilege",
-      "privilegeId": "7138382115758004004",
-      "level": 38,
-      "badgeSceneType": 8
-    },
-    {
-      "type": "privilege",
-      "privilegeId": "7196929090442595077",
-      "level": 50,
-      "badgeSceneType": 10
-    },
-    {
-      "type": "privilege",
-      "privilegeId": "7168535897666013994",
-      "level": 3,
-      "badgeSceneType": 4
-    }
-  ],
-  "userSceneTypes": [
-    1,
-    4,
-    6,
-    8,
-    10,
-    4,
-    6,
-    1
-  ],
-  "userDetails": {
-    "createTime": "0",
-    "bioDescription": "",
-    "profilePictureUrls": [
-      "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~tplv-tiktok-shrink:72:72.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=HtArrDWG3VOmeyqq1FToFoS7FvM%3D",
-      "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=YZtZ2%2FPQdqKVYSpqVl2o8%2BQG6vI%3D",
-      "https://p19-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.webp?lk3s=a5d48078&x-expires=1706238000&x-signature=UsTL8J6rW6xc6uov%2FniCCPVBkSk%3D",
-      "https://p16-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/095ce30e480b2bab504d6727c94677e9~c5_100x100.jpeg?lk3s=a5d48078&x-expires=1706238000&x-signature=cZWF5gCH0Xs61dYCABe1NLLu%2FJs%3D"
-    ]
-  },
-  "followInfo": {
-    "followingCount": 156,
-    "followerCount": 1412,
-    "followStatus": 2,
-    "pushStatus": 0
-  },
-  "isModerator": true,
-  "isNewGifter": false,
-  "isSubscriber": true,
-  "topGifterRank": null,
-  "gifterLevel": 38,
-  "teamMemberLevel": 50,
-  "msgId": "7327498468313058090",
-  "createTime": "1706066195334"
-}
-    */
 })
 
 // New gift received
@@ -1265,15 +1218,15 @@ connection.on('social', (data) => {
 })
 
 connection.on('questionNew', (data) => {
-    console.log('questionNew')
+    console.log('--- questionNew')
     console.log(data)
-    console.log('/questionNew')
+    console.log('--- questionNew')
 })
 let battleStats = $('#battleParties')
 connection.on('linkMicBattle', (data) => {
-    //console.log('/linkMicBattle')
-    //console.log(data)
-    //console.log('linkMicBattle')
+    console.log('---- linkMicBattle')
+    console.log(data)
+    console.log('---- linkMicBattle')
     let peopleSpan = 6
     if(data.battleUsers.length == 4){
         peopleSpan = 3
@@ -1460,11 +1413,6 @@ connection.on('liveIntro', (data) => {
     }
 })
 
-connection.on('emote', (data) => {
-    console.log('emote')
-    console.log(data)
-    console.log('/emote')
-})
 connection.on('envelope', (data) => {
     console.log('envelope')
     console.log(data)
@@ -1475,6 +1423,12 @@ connection.on('subscribe', (data) => {
     console.log(data)
     console.log('/subscribe')
 })
+
+//connection.on('emote', (data) => {
+//    console.log('emote')
+//    console.log(data)
+//    console.log('/emote')
+//})
 //connection.on('rawData', (data) => { //(messageTypeName, binary) => {
 //    console.log('Raw Data')
 //    console.log(data);
