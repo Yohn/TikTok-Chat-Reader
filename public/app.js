@@ -17,10 +17,27 @@ let roomDisplayId = '';
 let roomDisplayNickname = '';
 let roomStart = '';
 let roomEnd = '';
+
 let playSounds = 1;
 let saveGifts = 1;
+let voiceComments = 1;
 
 let ttn = [];
+
+String.prototype.removeLast = function(n) {
+    var string = this.split('')
+    string.length = string.length - n
+    return string.join('')
+}
+
+let playingSound = false, soundQue = []
+function addToQue(url){
+    if(playingSound == false){
+        playingSound = true
+    } else {
+
+    }
+}
 
 function hasClass(elem, className) {
     return elem.classList.contains(className);
@@ -150,13 +167,27 @@ function timeConverter(UNIX_timestamp){
     var a = new Date(UNIX_timestamp * 1000);
 
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const nthNumber = (number) => {
+        if (number > 3 && number < 21) return "th";
+        switch (number % 10) {
+            case 1:
+            return "st";
+            case 2:
+            return "nd";
+            case 3:
+            return "rd";
+            default:
+            return "th";
+        }
+    };
     var year = a.getFullYear();
     var month = months[a.getMonth()];
     var date = a.getDate();
     var hour = a.getHours();
     var min = a.getMinutes();
-    var sec = a.getSeconds();
-    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min; // + ':' + sec ;
+    //var sec = a.getSeconds();
+    var add0 = min < 10 ? 0 : ''
+    var time = month+' '+date+nthNumber(date)+' '+year+' '+hour+':'+add0+min; // + ':' + sec ;
     return time;
 }
 
@@ -169,8 +200,22 @@ function loadNote(title){ // , note
     $('#new-note-form').collapse('show')
 }
 
-let Config = {
+function removeGift(th){
+    let t = $(th), gift = t.data('name')
+    t.closest('li').slideUp()
+    socket.emit('removeGiftSound', {
+        gift : gift
+    })
+}
 
+function playSound(th){
+    let t = $(th), url = t.data('url')
+        , announcement = new Announcement(url);
+    t.find('.s-on').removeClass('d-none')
+    t.find('.s-off').addClass('d-none')
+    announcement.sound();
+}
+let Config = {
     buildNames(json){
         let datalist = document.getElementById('datalistOptions');
         datalist.innerHTML = ''
@@ -187,7 +232,6 @@ let Config = {
         }
         $('#name-list').html(html)
     },
-
     buildNotes(json){
         let notes = ''
         for(const note in json['notes']){
@@ -198,27 +242,38 @@ let Config = {
         }
         $('#note-list').html(notes)
     },
-
     buildSounds(json){
         let gsound = '' //, i, count = json['sounds']['gift'].length
-        for(const sou of json['sounds']['gift']){
-        //for(i=0;i < count; i++){
+        for(const sou in json['sounds']['gift']){
+            //<span>${json['sounds']['gift'][sou].removeLast(4)}</span>
+            //for(i=0;i < count; i++){
+            let filename = json['sounds']['gift'][sou]
+            let file = String(filename).removeLast(4).replace('/sounds/', '')
             gsound += `<li data-list-name="${sou}"
-            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-            ${sou}
-            <span class="badge text-bg-primary rounded-pill c-pointer"
-                data-url="${json['sounds']['gifts'][sou]}"
+            class="list-group-item list-group-item-action d-flex">
+            <span class="flex-grow-1">${sou}</span>
+            <span>${file}</span>
+            <span class="ms-3 c-pointer"
+                data-url="${json['sounds']['gift'][sou]}"
                 onclick="playSound(this)">
                 <svg fill="#0d6efd" class="s-on d-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 7l8-5v20l-8-5v-10zm-6 10h4v-10h-4v10zm20.264-13.264l-1.497 1.497c1.847 1.783 2.983 4.157 2.983 6.767 0 2.61-1.135 4.984-2.983 6.766l1.498 1.498c2.305-2.153 3.735-5.055 3.735-8.264s-1.43-6.11-3.736-8.264zm-.489 8.264c0-2.084-.915-3.967-2.384-5.391l-1.503 1.503c1.011 1.049 1.637 2.401 1.637 3.888 0 1.488-.623 2.841-1.634 3.891l1.503 1.503c1.468-1.424 2.381-3.309 2.381-5.394z"/></svg>
                 <svg fill="#6c757d" class="s-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 7.358v15.642l-8-5v-.785l8-9.857zm3-6.094l-1.548-1.264-3.446 4.247-6.006 3.753v3.646l-2 2.464v-6.11h-4v10h.843l-3.843 4.736 1.548 1.264 18.452-22.736z"/></svg>
             </span>
-            <span class="badge text-bg-primary rounded-pill c-pointer"
+            <span class="ms-3 c-pointer"
                 data-name="${sou}" onclick="removeGift(this)">
                 🗑️
             </span>
             </li>`
         }
         $('#gift-list').html(gsound)
+    },
+
+    buildUnusedGifts(json){
+        let giftDrop = '' //, i, count = json['sounds']['gift'].length
+        for(const gift in json['sounds']['unused']){
+            giftDrop += '<option value="'+gift+'">'+gift+'</option>'
+        }
+        $('#group-gift').html(giftDrop)
     },
 
     grabConfig(ups){
@@ -228,6 +283,7 @@ let Config = {
                 Config.buildNames(json)
                 Config.buildNotes(json)
                 Config.buildSounds(json)
+                Config.buildUnusedGifts(json)
             } else if(ups == 'names'){
                 Config.buildNames(json)
             } else if(ups == 'notes'){
@@ -247,9 +303,10 @@ let Config = {
         //    Config.buildSounds(json)
         //});
     }
-
-
 }
+
+
+
 
 Config.updateConfig();
 
@@ -262,10 +319,11 @@ class Announcement {
         if (!this.#soundUrl) {
             return;
         }
-        let audio = new Audio(this.#soundUrl);
+        let audio = new Audio(this.#soundUrl)
         audio.volume = Config["volume"];
         audio.play().catch();
     }
+
 }
 
 function removeName(th){
@@ -273,11 +331,17 @@ function removeName(th){
     socket.emit('removeNames', {
         name : name
     })
-
 }
 
 const userCog = $('#userCog')
 $(document).ready(() => {
+    $('#save-gift-sound').on('click', () => {
+        let gift = $('#group-gift').val(), sound = $('#group-sound').val()
+        socket.emit('saveGiftSound', {
+            gift: gift,
+            sound: '/sounds/'+sound
+        })
+    })
     $('#play-gift-sound').on('click', () => {
         let sfile = $('#group-sound').val()
         let announcement = new Announcement(
@@ -348,11 +412,25 @@ $(document).ready(() => {
             // make error
             name.addClass('is-invalid')
         } else {
-            name.removeClass('is-invalid')
-            socket.emit('addToNames', {
-                name : uname
-            })
+            if(Config.names.includes(uname)){
+
+            } else {
+                name.removeClass('is-invalid')
+                socket.emit('addToNames', {
+                    name : uname
+                })
+            }
         }
+    })
+    $('#vc-on').on('click', function(){
+        voiceComments = 2
+        $('#vc-on').addClass('d-none')
+        $('#vc-off').removeClass('d-none')
+    })
+    $('#vc-off').on('click', function(){
+        voiceComments = 1
+        $('#vc-off').addClass('d-none')
+        $('#vc-on').removeClass('d-none')
     })
     $('#s-on').on('click', function(){
         playSounds = 2
@@ -432,16 +510,14 @@ $(document).ready(() => {
 function connect() {
     let uniqueId = window.settings.username || $('#uniqueIdInput').val();
 
-    if(!Config['names'][uniqueId]){
+    if(!Config.names.includes(uniqueId)){
         socket.emit('addToNames', {
             name : uniqueId
         })
     }
 
     if (uniqueId !== '') {
-
         $('#stateText').text('Connecting...');
-
         connection.connect(uniqueId, {
             enableExtendedGiftInfo: true
         }).then(state => {
@@ -455,20 +531,30 @@ function connect() {
 
             display_start = timeConverter(state.roomInfo.create_time)
             $('#HostInfo').html(`
-                <img style="width:75px; max-width:75px;" class="h-auto rounded-circle float-left me-1" src="${state.roomInfo.owner.avatar_thumb.url_list[0]}">
-                <h4 class="text-center">
-                    ${state.roomInfo.owner.display_id}
-                    <br>
-                    ${state.roomInfo.owner.nickname}
-                    <br>
-                    Started: ${display_start}
-                </h4>`);
-            $('#stateText').text('<h3>Connected</h3>');
+                <div class="row">
+                    <div class="col-6">
+                        <div class="fs-4 text-center">
+                            ${state.roomInfo.owner.nickname}
+                        </div>
+                        <img class="h-auto rounded-circle float-left me-2" src="${state.roomInfo.owner.avatar_thumb.url_list[0]}">
+                        <div class="fs-4 text-center">
+                            @${state.roomInfo.owner.display_id}
+                            <br>
+                            Started: ${display_start}
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-1 m-2 bg-secondary-subtle text-secondary-emphasis border rounded">
+                            ${state.roomInfo.owner.bio_description.replace("\n", "<br>")}
+                        </div>
+                    </div>
+                </div>`);
+            $('#stateText').html('<h4 class="mb-0">Connected</h4>');
             roomDisplayId = state.roomInfo.owner.display_id;
             roomDisplayNickname = state.roomInfo.owner.nickname;
             roomStart = state.roomInfo.create_time
 
-            document.title = roomDisplayId+' - Yohns TikTok Live Chat Analytics Demo Beta 1';
+            document.title = roomDisplayId+' - Yohns TikTok Live Chat Analytics Demo Beta 3';
 
             let all_fans = state.roomInfo.top_fans
                 , total_fans = all_fans.length
@@ -512,6 +598,7 @@ function connect() {
             }
             console.log(allGifts)
             $('#group-gift').html(giftDrop)
+            $('#save-gift-sound').attr('disabled', false)
             //sendToDb('gifts', 'check', allGifts)
 
             if(roomDisplayId in usernames){} else {
@@ -597,58 +684,28 @@ function insertEmotes(comment, subEmotes) {
     });
     return comment;
 }
+
+const utterance = new SpeechSynthesisUtterance()
+let currentCharacter
+utterance.addEventListener('boundary', e => {
+    currentCharacter = e.charIndex
+})
+
+function playText(text) {
+    if (speechSynthesis.paused && speechSynthesis.speaking) {
+        return speechSynthesis.resume()
+    }
+    if (speechSynthesis.speaking) return
+    utterance.text = text
+    utterance.rate = 1 //speedInput.value || 1
+    //textInput.disabled = true
+    speechSynthesis.speak(utterance)
+}
 function addChatItem(color, data, text, cont) {
     let container = location.href.includes('obs.html') ? $('.eventcontainer') : $(cont);
     //🚔 👮
-    let badgeLength = data.userBadges.length
-    let afterName = '';
-    let b4Name = '';
+    let nickname, badgeLength = data.userBadges.length, afterName = '', b4Name = '';
     if(badgeLength > 0){
-        /*
-            "userBadges": [
-                {
-                    "badgeSceneType": 1,
-                    "type": "pm_mt_moderator_im",
-                    "name": "Moderator"
-                },
-                {
-                    "type": "image",
-                    "badgeSceneType": 4,
-                    "displayType": 1,
-                    "url": "https://p19-webcast.tiktokcdn-us.com/webcast-oci-tx/sub_9f7d6c8e732079b1313b9c1739f98e16046390c36258920b3b048f18c3847226~tplv-obj.image"
-                },
-                {
-                    "type": "privilege",
-                    "privilegeId": "7168535897666013994",
-                    "level": 3,
-                    "badgeSceneType": 4
-                },
-                {
-                    "type": "image",
-                    "badgeSceneType": 6,
-                    "displayType": 1,
-                    "url": "https://p19-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image"
-                },
-                {
-                    "type": "privilege",
-                    "privilegeId": "7138382115758004004",
-                    "level": 38,
-                    "badgeSceneType": 8
-                },
-                {
-                    "type": "privilege",
-                    "privilegeId": "7196929090442595077",
-                    "level": 50,
-                    "badgeSceneType": 10
-                },
-                {
-                    "type": "privilege",
-                    "privilegeId": "7168535897666013994",
-                    "level": 3,
-                    "badgeSceneType": 4
-                }
-
-        */
         for(let i = 0;i<badgeLength;i++){
             if(data.userBadges[i].type == 'image'){
                 afterName += '<img src="'+data.userBadges[i].url+'" class="img-fluid chat-img-badge">';
@@ -656,10 +713,10 @@ function addChatItem(color, data, text, cont) {
                 afterName += '👮';
             } else if(data.userBadges[i].badgeSceneType == 8){
                 // gifter level
-                b4Name += '<span class="gifter-level">💎 '+data.userBadges[i].level+'</span>'
+                b4Name += '<span class="gifter-level gifter-level-'+data.userBadges[i].level+'">💎 '+data.userBadges[i].level+'</span>'
             } else if(data.userBadges[i].badgeSceneType == 10){
                 // team level
-                b4Name += '<span class="team-level">💗 '+data.userBadges[i].level+'</span>'
+                b4Name += '<span class="team-level team-level-'+data.userBadges[i].level+'">💗 '+data.userBadges[i].level+'</span>'
             } else {
 
             }
@@ -671,24 +728,24 @@ function addChatItem(color, data, text, cont) {
         isFoll = data.followInfo.followStatus == 2 ? 'Friends w/ Host'
         : data.followInfo.followStatus == 1 ? 'Following Host' : 'Not Following Host';
         followInfo = `<div class="input-group my-3">
-        <span class="input-group-text w-50 text-center">${data.followInfo.followerCount} Followers</span>
-        <span class="input-group-text w-50 text-center">${data.followInfo.followingCount} Following</span>
-      </div>`;
+            <span class="input-group-text w-50 text-center">${data.followInfo.followerCount} Followers</span>
+            <span class="input-group-text w-50 text-center">${data.followInfo.followingCount} Following</span>
+        </div>`;
     }
     container.prepend(`
     <li class="list-group-item list-group-item-action px-1 pt-2 pb-1" title="${data.nickname}" data-bs-title="${data.nickname}" data-bs-toggle="popover" data-bs-content='<div class="row">
-    <div class="col-4"><img class="w-100 h-auto rounded-circle" src="${data.profilePictureUrl}"></div>
-    <div class="col-8">
-        <h3 style="white-space:pre;">${data.nickname.replaceAll("'", "&apos;")}</h3><h5 style="white-space:pre;">@${data.uniqueId}</h5>
-        <div class="bg-dark-subtle p-3 text-emphasis-dark border border-light-subtle">
-            ${isFoll}
+        <div class="col-4"><img class="w-100 h-auto rounded-circle" src="${data.profilePictureUrl}"></div>
+            <div class="col-8">
+                <h3 style="white-space:pre;">${data.nickname.replaceAll("'", "&apos;")}</h3><h5 style="white-space:pre;">@${data.uniqueId}</h5>
+                <div class="bg-dark-subtle p-3 text-emphasis-dark border border-light-subtle">
+                    ${isFoll}
+                </div>
+            </div>
         </div>
-    </div>
-  </div>
-  <div class="d-grid gap-2 col-12 mx-auto">
-    ${followInfo}
-    <a href="https://tiktok.com/@${data.uniqueId}" title="${data.nickname.replaceAll("'", "&apos;")}"   target="_blank" class="btn btn-primary">View TikTok</a>
-  </div>'>
+        <div class="d-grid gap-2 col-12 mx-auto">
+            ${followInfo}
+            <a href="https://tiktok.com/@${data.uniqueId}" title="${data.nickname.replaceAll("'", "&apos;")}"   target="_blank" class="btn btn-primary">View TikTok</a>
+        </div>'>
         <div class="row g-1 d-table">
             <div class="col-2 col-sm-1 d-table-cell align-top">
                 <img class="w-100 h-auto rounded-circle" src="${data.profilePictureUrl}">
@@ -702,8 +759,10 @@ function addChatItem(color, data, text, cont) {
         </div>
     </li>`);
     //     <p>${data.userDetails.bioDescription.replaceAll("'", "&apos;")}</p>
-
-  container.find('li[data-bs-toggle="popover"]:first').popover({
+    if(voiceComments == 1){
+        playText(text)
+    }
+    container.find('li[data-bs-toggle="popover"]:first').popover({
 		sanitize: false,
 		html: true,
         customClass: 'user-pop',
@@ -801,13 +860,34 @@ function addGiftItem(data) {
         giftFor = 'to '+generateUsernameLink(userIds[data.receiverUserId]);
     }
 
+    let badgeLength = data.userBadges.length
+    let afterName = '';
+    let b4Name = '';
+    if(badgeLength > 0){
+        for(let i = 0;i<badgeLength;i++){
+            if(data.userBadges[i].type == 'image'){
+                afterName += '<img src="'+data.userBadges[i].url+'" class="img-fluid chat-img-badge">';
+            } else if(data.userBadges[i].name == 'Moderator'){
+                afterName += '👮';
+            } else if(data.userBadges[i].badgeSceneType == 8){
+                // gifter level
+                b4Name += '<span class="gifter-level gifter-level-'+data.userBadges[i].level+'">💎 '+data.userBadges[i].level+'</span>'
+            } else if(data.userBadges[i].badgeSceneType == 10){
+                // team level
+                b4Name += '<span class="team-level team-level-'+data.userBadges[i].level+'">💗 '+data.userBadges[i].level+'</span>'
+            } else {
+
+            }
+        }
+    }
+
     let html = `<li class="list-group-item list-group-item-action p-1" data-streakid="${isPendingStreak(data) ? streakId : ''}">
     <div class="row g-2">
         <div class="col-1">
             <img class="w-100 h-auto rounded" src="${data.profilePictureUrl}">
         </div>
         <div class="col-11">
-            <p class="fw-bold mb-1">${generateUsernameLink(data)}:</b> <span>${data.describe} ${giftFor}</span></p>
+            <p class="fw-bold mb-1">${b4Name} ${generateUsernameLink(data)} ${afterName}:</b> <span>${data.describe} ${giftFor}</span></p>
             <div class="row g-1">
                 <div class="col-2">
                     <img class="w-100 h-auto rounded-circle" src="${data.giftPictureUrl}">
@@ -1000,6 +1080,12 @@ function updateTopGifters(viewers){
 //    console.log(data)
 //})
 
+socket.on('removeGiftSound', (data) => {
+    console.log(data)
+})
+socket.on('saveGiftSound', (data) => {
+    console.log(data)
+})
 socket.on('saveNote', (data) => {
     $('#note-results').html(data.r).collapse('show')
     setTimeout(function(){
@@ -1026,7 +1112,7 @@ socket.on('removeNames', (data) => {
 })
 socket.on('soundDirectory', (data) => {
     for(const sound in data.files){
-        $('#group-sound').append(`<option value="${data.files[sound]}">${data.files[sound]}</option>`)
+        $('#group-sound').append(`<option value="${data.files[sound]}">${data.files[sound].removeLast(4)}</option>`)
     }
 })
 socket.on('loginTry', (data) => {
@@ -1231,33 +1317,34 @@ connection.on('linkMicBattle', (data) => {
     if(data.battleUsers.length == 4){
         peopleSpan = 3
     }
-    let i, str = '<div class="card-body" id="battleParties"><div class="battle-row hide">'
-        +'<div class="row">'
-            +'<div class="col-6 mb-3 text-center">'
-                +'<big class="badge text-bg-primary" id="battle-team-1"></big></div>'
-            +'<div class="border-start col-6 mb-3 text-center">'
-                +'<big class="badge text-bg-primary" id="battle-team-2"></big></div>'
-        +'</div><div class="row">';
+    let i, str = '<div class="row">';
     for(i=0;i<data.battleUsers.length;i++){
         str += '<div class="col-'+peopleSpan+' text-center"><a href="https://www.tiktok.com/@'+data.battleUsers[i].uniqueId+'" target="_blank">'
         +'<img src="'+data.battleUsers[i].profilePictureUrl+'" class="rounded-circle" style="max-height:75px; width:auto;">'
         +'<br>'+data.battleUsers[i].uniqueId+'</a><br>'
-        +'<big class="badge text-bg-primary" id="battle-'+data.battleUsers[i].userId+'"></big></div>'
+        +'<div id="battle-'+data.battleUsers[i].userId+'"></div></div>'
     }
-    str += '</div></div></div>'
-    console.log(str)
+    str += '</div>'
+    //console.log(str)
     $('#battleParties').html(str)
     console.log('inserted battle stuff..')
 })
 
 connection.on('linkMicArmies', (data) => {
-    //console.log('linkMicArmies')
-    //console.log(data)
-    //console.log('/linkMicArmies')
+    console.log('linkMicArmies')
+    console.log(data)
+    console.log('/linkMicArmies')
     let i;
     //$('#battleStats').removeClass('d-none')
     for(i=0;i<data.battleArmies.length;i++){
-        $('#battle-'+data.battleArmies[i].hostUserId).html(data.battleArmies[i].points)
+        let i2, helpers = '', help_len = data.battleArmies[i].participants.length, giftersHere
+        for(i2=0;i2<help_len;i2++){
+            if(helpers != '') helpers += '<br>'
+            helpers += data.battleArmies[i].participants[i2].nickname
+        }
+        giftersHere = helpers == '' ? '' : '<p class="fs-6 bg-body-tertiary p-2 m-0">'+helpers+'</p>'
+        $('#battle-'+data.battleArmies[i].hostUserId).html('<big class="badge text-bg-primary">'+data.battleArmies[i].points+'</big>'+giftersHere)
+        //$(helpers)('#battle-'+data.battleArmies[i].hostUserId)
     }
     console.log('inserted info')
     /*

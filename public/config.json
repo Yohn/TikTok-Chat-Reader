@@ -1,7 +1,6 @@
 {
   "sounds": {
     "gift": {
-      "rose": "/sounds/enchanted.wav",
       "finger heart": "/sounds/cute-level-up.mp3",
       "heart me": "/sounds/bruh.mp3",
       "swan": "/sounds/Hed-P.E.SwanDive.mp3",
@@ -22,11 +21,21 @@
       "gem gun": "/sounds/Voicy_ColtPewPewPewBrawlstars.mp3",
       "train": "/sounds/Voicy_TrainHornSoundEffect.mp3",
       "motorcycle": "/sounds/motor-sesi.mp3",
-      "default": null
+      "default": null,
+      "rose": "enchanted.wav"
     },
     "subscribe": "/sounds/enchanted.wav",
     "follow": "/sounds/bruh.mp3",
     "unused": {
+      "rose": null,
+      "heart me": null,
+      "it’s a match": null,
+      "cuddle with me": null,
+      "you’re sweet": null,
+      "lover’s glasses": null,
+      "hand heart": null,
+      "hearts": null,
+      "gem gun": null,
       "ice cream cone": null,
       "tiktok": null,
       "friendship necklace": null,
@@ -271,8 +280,7 @@
       "leon and lion": null,
       "seal and whale": null,
       "tiktok stars": null,
-      "tiktok universe": null,
-      "default": null
+      "tiktok universe": null
     }
   },
   "enabled": {
@@ -282,20 +290,27 @@
   },
   "firstFollowOnly": true,
   "volume": 0.7,
+  "notes": {
+    "Invite to My Live": "dance hall        ray ray\nspade            \nglowrosen\nhigh class\ndmf savage\nisa\njimmy / rowdy\ncrunchy",
+    "Upcoming PKs": "Too freaking many",
+    "testing": "what up testing",
+    "hello": "again 1 yeah!",
+    "why": "whod this happen?",
+    "ok": "what the hell yo!!\n\nLets go!\nwhere we going?"
+  },
   "names": [
     "yohn.john",
-    "aviannaav",
     "a__bruna",
+    "aviannaav",
     "babysitterhk",
     "michelleshane01",
     "ttk_ruivax",
-    "rachelthaqueen",
     "chelsy_284",
     "sharynjamandre",
     "nazrinsalim12",
     "leizy416",
     "drubaby66",
-    "kiylajoy05",
+    "kliyjoy22",
     "kanabrewski",
     "virgo_tessa18",
     "francisgaray8",
@@ -304,14 +319,13 @@
     "bryon518",
     "biarciane",
     "rachelthaqueen",
-    "realrecognizereal1086"
-  ],
-  "notes": {
-    "Invite to My Live": "dance hall\nspade\nglowrosen\nhigh class\n",
-    "Upcoming PKs": "Too freaking many",
-    "testing": "what up testing",
-    "hello": "again 1 yeah!",
-    "why": "whod this happen?",
-    "ok": "what the hell yo!!\n\nLets go!\nwhere we going?"
-  }
+    "realrecognizereal1086",
+    "lya.lya16",
+    "lukethegreatt",
+    "boomingheart",
+    "boss.tambii",
+    "brown_sassy_rica",
+    "its_meaiai24",
+    "catheryn.j02"
+  ]
 }

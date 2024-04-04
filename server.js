@@ -6,8 +6,12 @@ const { Server } = require('socket.io');
 const { TikTokConnectionWrapper, getGlobalConnectionCount } = require('./connectionWrapper');
 const { clientBlocked } = require('./limiter');
 //const { updateUsernames, readUsernames } = require('./tt-usernames');
+// https://www.atatus.com/blog/read-write-a-json-file-with-node-js/
+// ^^ Possible alternative use for reading / writing files
 const editJsonFile = require("edit-json-file");
 const {google} = require('googleapis');
+
+//! used for finding files in the sounds folder
 
 var fs = require('fs');
 
@@ -80,7 +84,12 @@ io.on('connection', (socket) => {
         // Redirect message events
         tiktokConnectionWrapper.connection.on('roomUser', msg => socket.emit('roomUser', msg));
         tiktokConnectionWrapper.connection.on('member', msg => socket.emit('member', msg));
-        tiktokConnectionWrapper.connection.on('chat', msg => socket.emit('chat', msg));
+        tiktokConnectionWrapper.connection.on('chat', (msg) => {
+            // lets tranalate before it even comes to the front end,
+            // instead of sending to front, to back, and again to the front.
+            // thats too many, come on now
+            socket.emit('chat', msg)
+        });
         tiktokConnectionWrapper.connection.on('gift', msg => socket.emit('gift', msg));
         tiktokConnectionWrapper.connection.on('social', msg => socket.emit('social', msg));
         tiktokConnectionWrapper.connection.on('like', msg => socket.emit('like', msg));
@@ -91,7 +100,7 @@ io.on('connection', (socket) => {
         //tiktokConnectionWrapper.connection.on('emote', msg => socket.emit('emote', msg));
         tiktokConnectionWrapper.connection.on('envelope', msg => socket.emit('envelope', msg));
         tiktokConnectionWrapper.connection.on('subscribe', msg => socket.emit('subscribe', msg));
-        tiktokConnectionWrapper.connection.on('rawData',  (messageTypeName, binary) => socket.emit('rawData', messageTypeName));
+        //tiktokConnectionWrapper.connection.on('rawData',  (messageTypeName, binary) => socket.emit('rawData', messageTypeName));
        //console.log(messageTypeName, binary);
     });
 
@@ -285,6 +294,29 @@ io.on('connection', (socket) => {
         r : 'done',
         files : sounds
     });
+    socket.on('saveGiftSound', async (data) => {
+        let msg
+        if(data.gift == '' || data.sound == ''){
+            // error
+            msg = 'Gift or Sound not found.'
+        } else {
+            file.set('sounds.gift.'+data.gift, data.sound)
+            file.save();
+            msg = 'Sound had been saved for gift - '+data.gift+'.'
+        }
+        socket.emit('saveGiftSound', {
+            r : `<div class="alert alert-secondary mt-3" role="alert">${msg}</div>`
+        });
+    })
+    socket.on('removeGiftSound', async (data) => {
+        file.set('sounds.gift.'+data.gift, data.sound)
+        file.save();
+        msg = 'Gift sound had been removed for - '+data.gift+'.'
+        socket.emit('removeGiftSound', {
+            r : `<div class="alert alert-secondary mt-3" role="alert">${msg}</div>`
+        });
+    })
+
     socket.on('saveNote', async (data) => {
         let msg = ''
         if(data.id == 'new'){
@@ -300,14 +332,15 @@ io.on('connection', (socket) => {
         });
     })
     socket.on('addToNames', async (data) => {
-        let dname = data.name
-        //file.set('sounds.'+dname, 'somestr')
-        file.append('names', dname)
-        file.save();
-        socket.emit('addToNames', {
-            r : 'done',
-            name : dname
-        });
+        let dname = data.name, json = file.get('names')
+        if(json.includes(dname) == false){
+            file.append('names', dname)
+            file.save();
+            socket.emit('addToNames', {
+                r : 'done',
+                name : dname
+            });
+        }
     })
     socket.on('removeNames', async (data) => {
         let dname = data.name, list = file.get('names'),
@@ -317,7 +350,7 @@ io.on('connection', (socket) => {
         //console.log(data)
         //console.log('remove - '+dname)
         for(i=0;i<list_len;i++){
-            if(list[i] == dname){
+            if(ob.includes(dname) || list[i] == dname){
                 //console.log('found -- '+list[i])
             } else {
                 //console.log('--'+list[i])
@@ -325,7 +358,7 @@ io.on('connection', (socket) => {
             }
         }
         //console.log(ob)
-        file.set('names', ob)
+        file.set('names', ob.sort().reverse())
         file.save();
         socket.emit('removeNames', {
             r : 'done',
