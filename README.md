@@ -9,7 +9,7 @@ To run the chat reader locally, follow these steps:
 1. Install [Node.js](https://nodejs.org/) on your system
 2. Clone this repository or download and extract [this ZIP file](https://github.com/zerodytrash/TikTok-Chat-Reader/archive/refs/heads/main.zip)
 3. Open a console/terminal in the root directory of the project
-4. Enter `npm i` to install all required dependencies 
+4. Enter `npm i` to install all required dependencies
 5. Enter `node server.js` to start the application server
 
 Now you should see the following message: `Server running! Please visit http://localhost:8091`<br>
@@ -20,4 +20,4 @@ This will use the server backend of the [demo site](https://tiktok-chat-reader.z
 
 ## Screenshot
 
-![TikTok LIVE Chat Reader (Demo)](https://user-images.githubusercontent.com/59258980/153956504-c585b14b-a50e-43f0-a994-64adcaface2e.png)
+![Screen Shot 2023-12-19 at 07 18 11-fullpage](https://github.com/Yohn/TikTok-Chat-Reader/assets/2002591/198baef0-7ef8-4679-87ab-ccb11d8804c7)
