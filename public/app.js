@@ -305,9 +305,6 @@ let Config = {
     }
 }
 
-
-
-
 Config.updateConfig();
 
 class Announcement {
@@ -678,7 +675,6 @@ function insertEmotes(comment, subEmotes) {
     subEmotes.forEach(emoteObj => {
         const position = emoteObj.placeInComment || 0;
         const emoteImageTag = `<img src="${emoteObj.emoteImageUrl}" alt="emote" class="img-fluid chat-img-emote">`;
-
         // Insert the image tag at the specified position
         comment = comment.slice(0, position) + emoteImageTag + comment.slice(position);
     });
