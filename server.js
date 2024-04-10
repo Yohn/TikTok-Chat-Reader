@@ -23,6 +23,7 @@ const httpServer = createServer(app);
 app.use(express.urlencoded({ extended: true }));
 
 let file = editJsonFile(`${__dirname}/public/config.json`);
+let toDoData = editJsonFile(`${__dirname}/toDoData.json`);
 
 // Enable cross origin resource sharing
 const io = new Server(httpServer, {
@@ -93,13 +94,25 @@ io.on('connection', (socket) => {
         tiktokConnectionWrapper.connection.on('gift', msg => socket.emit('gift', msg));
         tiktokConnectionWrapper.connection.on('social', msg => socket.emit('social', msg));
         tiktokConnectionWrapper.connection.on('like', msg => socket.emit('like', msg));
-        tiktokConnectionWrapper.connection.on('questionNew', msg => socket.emit('questionNew', msg));
+        tiktokConnectionWrapper.connection.on('questionNew', (msg) => {
+            socket.emit('questionNew', msg);
+            toDoData.append('toDoData.questionNew', data)
+            toDoData.save();
+        })
         tiktokConnectionWrapper.connection.on('linkMicBattle', msg => socket.emit('linkMicBattle', msg));
         tiktokConnectionWrapper.connection.on('linkMicArmies', msg => socket.emit('linkMicArmies', msg));
         tiktokConnectionWrapper.connection.on('liveIntro', msg => socket.emit('liveIntro', msg));
         //tiktokConnectionWrapper.connection.on('emote', msg => socket.emit('emote', msg));
-        tiktokConnectionWrapper.connection.on('envelope', msg => socket.emit('envelope', msg));
-        tiktokConnectionWrapper.connection.on('subscribe', msg => socket.emit('subscribe', msg));
+        tiktokConnectionWrapper.connection.on('envelope', (msg) => {
+            socket.emit('envelope', msg);
+            toDoData.append('toDoData.questionNew', msg)
+            toDoData.save();
+        })
+        tiktokConnectionWrapper.connection.on('subscribe', (msg) => {
+            socket.emit('subscribe', msg);
+            toDoData.append('toDoData.subscribe', msg)
+            toDoData.save();
+        })
         //tiktokConnectionWrapper.connection.on('rawData',  (messageTypeName, binary) => socket.emit('rawData', messageTypeName));
        //console.log(messageTypeName, binary);
     });
@@ -139,6 +152,7 @@ io.on('connection', (socket) => {
     })
 
     // data.place, data.vals
+    // google sheets
     socket.on('userSaveNote', async (dat)=>{
         //Auth client Object
         const authClientObject = await auth.getClient();
@@ -317,18 +331,65 @@ io.on('connection', (socket) => {
         });
     })
 
+    socket.on('toDoData', async (data) => {
+        toDoData.append('toDoData'+data.socket, data.data)
+        toDoData.save();
+        socket.emit('toDoData', {
+            r : `Saved to-do Data!`
+        });
+    })
+    socket.on('deleteNote', async (data) => {
+        let find = data.name, list = file.get('notes'),
+        list_len = list.length, i, ob = []
+        file.unset('notes')
+        console.log('find -- '+find+' --- find')
+        console.log(list_len+' total notes')
+        for(i=0;i<list_len;i++){
+            if(list[i].name == find){
+                // do nothing to remove it
+                console.log(list[i].name+' = '+find)
+            } else {
+                ob.push(list[i])
+                console.log(list[i])
+                console.log('--- list['+i+'] ---')
+                file.append('notes', list[i])
+            }
+        }
+        //file.set('notes', ob)
+        file.save();
+        socket.emit('deleteNote', {
+            r : 'Note removed!'
+        });
+    })
     socket.on('saveNote', async (data) => {
         let msg = ''
         if(data.id == 'new'){
-            file.append('notes.'+data.name, data.note)
+            //file.append('notes.'+data.name, data.note)
+            file.append('notes', {name : data.name, note : data.note})
             msg = 'New Note Saved!'
         } else {
-            file.set('notes.'+data.id, data.note)
+            let find = data.id, list = file.get('notes'),
+            list_len = list.length, i, ob = []
+            //console.log(list)
+            //file.set('notes', undefined)
+            //console.log(find)
+            //console.log('----find')
+            ////console.log('remove - '+dname)
+            for(i=0;i<list_len;i++){
+                if(list[i].name == find){
+                    ob.push({name : data.name, note : data.note})
+                } else {
+                    ob.push(list[i])
+                }
+            }
+            console.log(ob)
+            file.set('notes', ob)
+            //file.append('notes.'+data.name, data.note)
             msg = 'Note Updated!'
         }
         file.save();
         socket.emit('saveNote', {
-            r : `<div class="alert alert-secondary mt-3" role="alert">${msg}</div>`
+            r : msg
         });
     })
     socket.on('addToNames', async (data) => {

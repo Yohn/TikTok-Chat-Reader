@@ -3,6 +3,7 @@ body {
     /*min-width: 800px;*/
 }
 .c-pointer {cursor: pointer;}
+.c-pointer svg:hover {fill: #087990;}
 
 h1 {
     font-size: 1.8em;

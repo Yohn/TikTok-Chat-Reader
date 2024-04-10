@@ -110,3 +110,6 @@ dist
 .tern-port
 /public/tt-usernames.json
 /tt-usernames.js
+/public/config.json
+public/config.json
+**/config.json
