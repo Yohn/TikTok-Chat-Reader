@@ -15,21 +15,12 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-	<script src="connection.js"></script>
-	<script src="app.js"></script>
 
-	<script>
-		function generateOverlay() {
-			let username = $('#uniqueIdInput').val();
-			let url = `/obs.html?username=${username}&showLikes=1&showChats=1&showGifts=1&showFollows=1&showJoins=1&bgColor=rgb(24,23,28)&fontColor=rgb(227,229,235)&fontSize=1.3em`;
 
-			if(username) {
-				window.open(url, '_blank');
-			} else {
-				alert("Enter username");
-			}
-		}
-	</script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+	<!--link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" /-->
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
@@ -391,6 +382,57 @@
 	</div>
 </div> -->
 
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="soundModalLabel">Random Settings</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-2">
+						<div class="d-flex justify-content-center">
+							<div class="spinner-border spinner-border-sm text-primary" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-10">
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" role="switch" id="enable-gift-sounds">
+							<label class="form-check-label" for="enable-gift-sounds">
+								Gift Sounds
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-2">
+						<div class="d-flex justify-content-center">
+							<div class="spinner-border spinner-border-sm text-primary" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-10">
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" role="switch" id="enable-tts">
+							<label class="form-check-label" for="enable-tts">
+								Text to Speech
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer flex-nowrap p-0">
+				<button type="button" class="btn btn-lg btn-dark fs-6 text-decoration-none col-6 py-3 m-0 rounded-0 border-end" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-lg btn-primary fs-6 text-decoration-none col-6 py-3 m-0 rounded-0">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="modal fade" id="soundModal" tabindex="-1" aria-labelledby="soundModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered">
 		<div class="modal-content">
@@ -486,6 +528,13 @@
 		</div>
 	</div>
 </div>
+
+<div class="position-fixed top-50 start-50 translate-middle p-3" id="toast-container"></div>
+
+<script src="connection.js"></script>
+<script src="functions.js"></script>
+<script src="classes.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>

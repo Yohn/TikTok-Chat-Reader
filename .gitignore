@@ -113,3 +113,4 @@ dist
 /public/config.json
 public/config.json
 **/config.json
+.vscode/TikTok-Chat-Reader.code-workspace
