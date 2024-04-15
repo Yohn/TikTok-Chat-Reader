@@ -29,12 +29,10 @@ const updateCountDown = (time) => {
 	}, 1000)
 }
 
-function addToQue(url){
-	if(playingSound == false){
-		playingSound = true
-	} else {
-
-	}
+String.prototype.removeLast = function(n) {
+	var string = this.split('')
+	string.length = string.length - n
+	return string.join('')
 }
 
 function hasClass(elem, className) {
@@ -106,6 +104,33 @@ function calcDate(date1, date2) {
 
 }
 
+function timeConverter(UNIX_timestamp){
+	var a = new Date(UNIX_timestamp * 1000);
+
+	var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+	const nthNumber = (number) => {
+		if (number > 3 && number < 21) return "th";
+		switch (number % 10) {
+			case 1:
+			return "st";
+			case 2:
+			return "nd";
+			case 3:
+			return "rd";
+			default:
+			return "th";
+		}
+	};
+	var year = a.getFullYear();
+	var month = months[a.getMonth()];
+	var date = a.getDate();
+	var hour = a.getHours();
+	var min = a.getMinutes();
+	//var sec = a.getSeconds();
+	var add0 = min < 10 ? 0 : ''
+	var time = month+' '+date+nthNumber(date)+' '+year+' '+hour+':'+add0+min; // + ':' + sec ;
+	return time;
+}
 function generateOverlay() {
 	let username = $('#uniqueIdInput').val();
 	let url = `/obs.html?username=${username}&showLikes=1&showChats=1&showGifts=1&showFollows=1&showJoins=1&bgColor=rgb(24,23,28)&fontColor=rgb(227,229,235)&fontSize=1.3em`;
@@ -158,34 +183,6 @@ function sendToDb(table, state, data){
 	});*/
 }
 
-function timeConverter(UNIX_timestamp){
-	var a = new Date(UNIX_timestamp * 1000);
-
-	var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-	const nthNumber = (number) => {
-		if (number > 3 && number < 21) return "th";
-		switch (number % 10) {
-			case 1:
-			return "st";
-			case 2:
-			return "nd";
-			case 3:
-			return "rd";
-			default:
-			return "th";
-		}
-	};
-	var year = a.getFullYear();
-	var month = months[a.getMonth()];
-	var date = a.getDate();
-	var hour = a.getHours();
-	var min = a.getMinutes();
-	//var sec = a.getSeconds();
-	var add0 = min < 10 ? 0 : ''
-	var time = month+' '+date+nthNumber(date)+' '+year+' '+hour+':'+add0+min; // + ':' + sec ;
-	return time;
-}
-
 function loadNote(title){ // , note
 	let box = Array.isArray(Config.notes[title]) ? Config.notes[title][0] : Config.notes[title]
 	for(const note in Config['notes']){
@@ -213,10 +210,9 @@ function removeGift(th){
 
 function playSound(th){
 	let t = $(th), url = t.data('url')
-		, announcement = new Announcement(url);
 	t.find('.s-on').removeClass('d-none')
 	t.find('.s-off').addClass('d-none')
-	announcement.sound();
+	sounds.addSound(url)
 }
 
 // Prevent Cross site scripting (XSS)
@@ -519,13 +515,11 @@ function addGiftItem(data) {
 			});
 		}
 
-		let sPath = Config["sounds"]["gift"][data["giftName"].toLowerCase()] || Config["sounds"]["gift"]["default"]
+		let sPath = Config["sounds"]["gift"][data["giftName"].toLowerCase()]
+			|| Config["sounds"]["gift"]["default"]
 		if(playSounds == 1 && Config["enabled"]["gift"] && sPath){
 			console.log('play sound?')
-			let announcement = new Announcement(
-				sPath
-			);
-			announcement.sound();
+			sounds.addSound(sPath)
 		}
 	}
 }

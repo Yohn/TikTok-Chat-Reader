@@ -28,7 +28,10 @@ let select2Options = {
 	theme: 'bootstrap-5',
 	dropdownParent: $('#soundModal')
 }
-
+const utterance = new SpeechSynthesisUtterance()
+let currentCharacter
+const userCog = $('#userCog')
+const sounds = new Sounds()
 
 function connect() {
 	let uniqueId = window.settings.username || $('#uniqueIdInput').val();
@@ -199,28 +202,15 @@ function connect() {
 	}
 }
 
-
-String.prototype.removeLast = function(n) {
-	var string = this.split('')
-	string.length = string.length - n
-	return string.join('')
-}
-
-let playingSound = false, soundQue = []
-
 // These settings are defined by obs.html
 if (!window.settings) window.settings = {};
 
-
-const utterance = new SpeechSynthesisUtterance()
-let currentCharacter
 utterance.addEventListener('boundary', e => {
 	currentCharacter = e.charIndex
 })
 
 Config.updateConfig();
 
-const userCog = $('#userCog')
 $(document).ready(() => {
 	$('#delete-note').on('click', ()=>{
 		let name = $('#note-id').val()
@@ -238,19 +228,16 @@ $(document).ready(() => {
 	})
 	$('#play-gift-sound').on('click', () => {
 		let sfile = $('#group-sound').val()
-		let announcement = new Announcement(
-			'/sounds/'+sfile
-		);
-		announcement.sound();
+		sounds.addSound('sounds/'+sfile)
 	})
-	$('#new-note').on('click', function(){
+	$('#new-note').on('click', () => {
 		$('#note-id').val('new')
 		$('#delete-note').slideUp('fast')
 		$('#new-note-name').val('')
 		$('#new-note-info').val('')
 		$('#new-note-form').collapse('show')
 	})
-	$('#save-note').on('click', function(){
+	$('#save-note').on('click', () => {
 		let id = $('#note-id').val(),
 		name = $('#new-note-name'),
 		info = $('#new-note-info'),
@@ -301,7 +288,7 @@ $(document).ready(() => {
 			//}
 		}
 	})
-	$('#add-username').on('click', function(){
+	$('#add-username').on('click', () => {
 		let name = $('#new-username'), uname = name.val()
 		if(uname == ''){
 			// make error
@@ -317,37 +304,37 @@ $(document).ready(() => {
 			}
 		}
 	})
-	$('#vc-on').on('click', function(){
+	$('#vc-on').on('click', () => {
 		voiceComments = 2
 		$('#vc-on').addClass('d-none')
 		$('#vc-off').removeClass('d-none')
 	})
-	$('#vc-off').on('click', function(){
+	$('#vc-off').on('click', () => {
 		voiceComments = 1
 		$('#vc-off').addClass('d-none')
 		$('#vc-on').removeClass('d-none')
 	})
-	$('#s-on').on('click', function(){
+	$('#s-on').on('click', () => {
 		playSounds = 2
 		$('#s-on').addClass('d-none')
 		$('#s-off').removeClass('d-none')
 	})
-	$('#s-off').on('click', function(){
+	$('#s-off').on('click', () => {
 		playSounds = 1
 		$('#s-off').addClass('d-none')
 		$('#s-on').removeClass('d-none')
 	})
-	$('#g-on').on('click', function(){
+	$('#g-on').on('click', () => {
 		saveGifts = 2
 		$('#g-on').addClass('d-none')
 		$('#g-off').removeClass('d-none')
 	})
-	$('#g-off').on('click', function(){
+	$('#g-off').on('click', () => {
 		saveGifts = 1
 		$('#g-off').addClass('d-none')
 		$('#g-on').removeClass('d-none')
 	})
-	$('#ch').on('click', function(){
+	$('#ch').on('click', () => {
 
 		socket.emit('addToNames', {
 			name : 'another name'
@@ -356,11 +343,11 @@ $(document).ready(() => {
 		console.log('saveGifts = '+saveGifts)
 		console.log('------------')
 	})
-	$('#userSignUpLink').on('click', function(){
+	$('#userSignUpLink').on('click', () => {
 		bootstrap.showAlert({title: "Sign Up Closed", body: "During testing phases, our sign up process will be closed. If you would like to test some new features, please contact Yohn."})
 	})
 
-	$('#userLogin').on('click', function(){
+	$('#userLogin').on('click', () => {
 		userCog.find('.switch-toggle').toggleClass('d-none')
 		socket.emit('userLogin', {
 			email : $('#userEmail').val(),
@@ -368,7 +355,7 @@ $(document).ready(() => {
 		})
 	})
 
-	$('#copy-table').on('click', function(){
+	$('#copy-table').on('click', () => {
 		//console.log('copy btn clicked')
 		let gt = $('#gifter-table')
 		gt.find('save').removeClass('d-none')
@@ -395,7 +382,7 @@ $(document).ready(() => {
 			trigger: 'focus'
 		};
 	let chatcont = $('#chatcontainer')
-	$('#add-row').on('click', function(){
+	$('#add-row').on('click', () => {
 		let row = $('#the-row').html()
 		chatcont.prepend(row)
 		chatcont.find('li[data-bs-toggle="popover"]:first').popover(pops)
@@ -426,7 +413,7 @@ socket.on('deleteNote', (data) => {
 	$('#new-note-info').val('')
 	$('#new-note-form').collapse('hide')
 	$('#delete-note').slideUp('fast')
-	setTimeout(function(){
+	setTimeout(() => {
 		$('#note-results').collapse('hide')
 		//Config.updateConfig();
 		Config.grabConfig('notes')
@@ -436,7 +423,7 @@ socket.on('saveNote', (data) => {
 	$('#note-results').html(`<div class="alert alert-secondary mt-3" role="alert">
 		${data.r}
 	</div>`).collapse('show')
-	setTimeout(function(){
+	setTimeout(() => {
 		$('#note-results').collapse('hide')
 		//Config.updateConfig();
 		Config.grabConfig('notes')
@@ -457,7 +444,7 @@ socket.on('removeNames', (data) => {
 	console.log('-----removeNames return-----')
 	console.log(data)
 	console.log('-----removeNames return-----')
-	$('li[data-list-name="'+data.name+'"]').slideUp('fast', function(){$(this).remove();})
+	$('li[data-list-name="'+data.name+'"]').slideUp('fast', () => {$(this).remove();})
 })
 socket.on('soundDirectory', (data) => {
 	for(const sound in data.files){

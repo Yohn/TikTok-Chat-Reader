@@ -102,20 +102,35 @@ let Config = {
 	}
 }
 
-class Announcement {
-	#soundUrl;
-	constructor(soundUrl) {
-		this.#soundUrl = soundUrl;
+class Sounds {
+	playlist = []
+	playing = false
+	volume = 70 // Config.volume
+	//audio = new Audio()
+	addSound(sound){
+		this.playlist.push(sound)
+    this.play()
+		return true
 	}
-	sound() {
-		if (!this.#soundUrl) {
-			return;
+	isPlaying(){
+		return this.playing
+	}
+	play(){
+		console.log(this.playlist[0])
+		if(this.isPlaying() == false && this.playlist[0]){
+			const audio = new Audio(this.playlist[0])
+			audio.volume = this.volume;
+			this.playing = true
+			audio.play()
+			audio.onended = ()=>{
+				this.playing = false
+				this.playlist.shift()
+				if(this.playlist.length > 0){
+					this.play()
+				}
+			}
 		}
-		let audio = new Audio(this.#soundUrl)
-		audio.volume = Config["volume"];
-		audio.play().catch();
 	}
-
 }
 
 //change some settings
