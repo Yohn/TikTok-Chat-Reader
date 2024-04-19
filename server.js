@@ -1,4 +1,5 @@
 require('dotenv').config();
+import { writeFile } from "fs";
 
 const express = require('express');
 const { createServer } = require('http');
@@ -105,7 +106,7 @@ io.on('connection', (socket) => {
         //tiktokConnectionWrapper.connection.on('emote', msg => socket.emit('emote', msg));
         tiktokConnectionWrapper.connection.on('envelope', (msg) => {
             socket.emit('envelope', msg);
-            toDoData.append('toDoData.questionNew', msg)
+            toDoData.append('toDoData.envelope', msg)
             toDoData.save();
         })
         tiktokConnectionWrapper.connection.on('subscribe', (msg) => {
@@ -116,6 +117,15 @@ io.on('connection', (socket) => {
         //tiktokConnectionWrapper.connection.on('rawData',  (messageTypeName, binary) => socket.emit('rawData', messageTypeName));
        //console.log(messageTypeName, binary);
     });
+
+
+		socket.on("upload", (file, callback) => {
+			console.log(file); // <Buffer 25 50 44 ...>
+			// save the content to the disk, for example
+			writeFile("sounds/", file, (err) => {
+				console.log({ message: err ? "failure" : "success" });
+			});
+		});
 
     socket.on('disconnect', () => {
         if (tiktokConnectionWrapper) {
@@ -332,7 +342,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('toDoData', async (data) => {
-        toDoData.append('toDoData'+data.socket, data.data)
+        toDoData.append('toDoData.'+data.socket, data.data)
         toDoData.save();
         socket.emit('toDoData', {
             r : `Saved to-do Data!`

@@ -115,11 +115,13 @@ class Sounds {
 	isPlaying(){
 		return this.playing
 	}
+	clearSounds(){
+		this.playlist = []
+	}
 	play(){
-		console.log(this.playlist[0])
 		if(this.isPlaying() == false && this.playlist[0]){
 			const audio = new Audio(this.playlist[0])
-			audio.volume = this.volume;
+			//audio.volume = this.volume;
 			this.playing = true
 			audio.play()
 			audio.onended = ()=>{
@@ -130,6 +132,46 @@ class Sounds {
 				}
 			}
 		}
+	}
+}
+
+//! exactly like the Sounds class but for text to speech
+//? Idk if we need this..
+class TTS {
+	list = []
+	talking = false
+
+	say(text){
+		this.list.push(text)
+    this.talk()
+		return true
+	}
+	isTalking(){
+		return this.talking
+	}
+	talk(){
+		if(this.isTalking() == false && this.list[0]){
+			//const utterance = new SpeechSynthesisUtterance()
+			//let currentCharacter
+			if (speechSynthesis.paused && speechSynthesis.speaking) {
+				return speechSynthesis.resume()
+			}
+			if (speechSynthesis.speaking) return
+			utterance.text = text
+			utterance.rate = 1
+			this.talking = true
+			speechSynthesis.speak(utterance)
+			speechSynthesis.onend = ()=>{
+				this.talking = false
+				this.list.shift()
+				if(this.list.length > 0){
+					this.talk()
+				}
+			}
+		}
+	}
+	shutUp(){
+		speechSynthesis.cancel()
 	}
 }
 

@@ -1,3 +1,36 @@
+const utterance = new SpeechSynthesisUtterance()
+let currentCharacter, talkList = []
+utterance.addEventListener('boundary', e => {
+	currentCharacter = e.charIndex
+})
+function playText(text) {
+	if(speechSynthesis.speaking){
+		talkList.push(text)
+		return
+	}
+	if (speechSynthesis.paused && speechSynthesis.speaking) {
+		return speechSynthesis.resume()
+	}
+	utterance.text = text
+	utterance.rate = 1 //speedInput.value || 1
+	//textInput.disabled = true
+	speechSynthesis.speak(utterance)
+}
+speechSynthesis.onend = ()=>{
+	talkList.shift()
+	if(talkList.length > 0){
+		utterance.text = talkList[0]
+		utterance.rate = 1 //speedInput.value || 1
+		//textInput.disabled = true
+		speechSynthesis.speak(utterance)
+	}
+}
+// https://socket.io/how-to/upload-a-file
+function upload(files) {
+	socket.emit("upload", files[0], (status) => {
+		console.log(status);
+	});
+}
 
 const updateCountDown = (time) => {
 	const etime = document.getElementById('battle-time')
@@ -209,10 +242,12 @@ function removeGift(th){
 }
 
 function playSound(th){
-	let t = $(th), url = t.data('url')
-	t.find('.s-on').removeClass('d-none')
-	t.find('.s-off').addClass('d-none')
-	sounds.addSound(url)
+	let t = $(th), url = t.data('url'), son = t.find('.s-on')
+	son.toggleClass('d-none')
+	t.find('.s-off').toggleClass('d-none')
+	if(son.hasClass('d-none')){
+		sounds.addSound(url)
+	}
 }
 
 // Prevent Cross site scripting (XSS)
@@ -220,17 +255,17 @@ function sanitize(text) {
 	return text ? text.replace(/</g, '&lt;') : ''
 }
 
-function updateRoomStats() {
+function updateRoomStats(){
 	$('#viewerCountStats').val(parseInt(viewerCount).toLocaleString('en'));
 	$('#likeCountStats').val(parseInt(likeCount).toLocaleString('en'));
 	$('#diamondsCountStats').val(parseInt(diamondsCount).toLocaleString('en'));
 }
 
-function generateUsernameLink(data) {
+function generateUsernameLink(data){
 	return `<a href="https://tiktok.com/@${data.uniqueId}" title="${data.nickname}" target="_blank" class="usernamelink">${data.nickname}</a>`; /*<button type="button" class="usernamelink btn btn-link" title="${data.nickname}" data-bs-toggle="popover" onclick="openPop()" data-bs-title="${data.nickname}">${data.uniqueId}</button>`; */
 }
 
-function isPendingStreak(data) {
+function isPendingStreak(data){
 	return data.giftType === 1 && !data.repeatEnd;
 }
 
@@ -250,16 +285,7 @@ function insertEmotes(comment, subEmotes) {
 	});
 	return comment;
 }
-function playText(text) {
-	if (speechSynthesis.paused && speechSynthesis.speaking) {
-		return speechSynthesis.resume()
-	}
-	if (speechSynthesis.speaking) return
-	utterance.text = text
-	utterance.rate = 1 //speedInput.value || 1
-	//textInput.disabled = true
-	speechSynthesis.speak(utterance)
-}
+
 function addChatItem(color, data, text, cont) {
 	let container = location.href.includes('obs.html') ? $('.eventcontainer') : $(cont);
 	//🚔 👮
@@ -292,7 +318,8 @@ function addChatItem(color, data, text, cont) {
 		</div>`;
 	}
 	container.prepend(`
-	<li class="list-group-item list-group-item-action px-1 pt-2 pb-1" title="${data.nickname}" data-bs-title="${data.nickname}" data-bs-toggle="popover" data-bs-content='<div class="row">
+	<li class="list-group-item list-group-item-action px-1 pt-2 pb-1" title="${data.nickname}" data-bs-title="${data.nickname}" data-bs-toggle="popover"
+		data-bs-content='<div class="row">
 		<div class="col-4"><img class="w-100 h-auto rounded-circle" src="${data.profilePictureUrl}"></div>
 			<div class="col-8">
 				<h3 style="white-space:pre;">${data.nickname.replaceAll("'", "&apos;")}</h3><h5 style="white-space:pre;">@${data.uniqueId}</h5>
@@ -319,12 +346,15 @@ function addChatItem(color, data, text, cont) {
 	</li>`);
 	//	 <p>${data.userDetails.bioDescription.replaceAll("'", "&apos;")}</p>
 	if(voiceComments == 1){
-		playText(text)
+		if(cont == '.chatcontainer'){
+			//tts.say()
+			playText(text)
+		}
 	}
 	container.find('li[data-bs-toggle="popover"]:first').popover({
 		sanitize: false,
 		html: true,
-		customClass: 'user-pop',
+		customClass: 'user-pop'
 		//trigger: 'click',
 		//delay: {"show": 200, "hide": 500}
 	}).on('show.bs.popover', () => {
@@ -631,7 +661,6 @@ function updateTopGifters(viewers){
 		//console.log('no viewers')
 	}
 }
-
 
 function removeName(th){
 	let th2 = $(th), name = th2.data('name')

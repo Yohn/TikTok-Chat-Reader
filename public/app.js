@@ -22,14 +22,17 @@ let playSounds = 1;
 let saveGifts = 1;
 let voiceComments = 1;
 
+let battleStats = $('#battleParties')
+
 let ttn = [];
 
 let select2Options = {
 	theme: 'bootstrap-5',
 	dropdownParent: $('#soundModal')
 }
-const utterance = new SpeechSynthesisUtterance()
-let currentCharacter
+
+//const tts = new TTS()
+
 const userCog = $('#userCog')
 const sounds = new Sounds()
 
@@ -137,14 +140,14 @@ function connect() {
 				// <img src="sounds/${state.element.value}" class="img-flag" />
 				const coins = state.element.dataset.coins
 				const img = state.element.dataset.img
-				var $state = $(`<div><img src="${img}" alt=" "> ${state.text} <span>${coins} coins</span></div>`);
+				var $state = $(`<span><img src="${img}" alt=" "> ${state.text} <span>${coins} coins</span></span>`);
 				return $state;
 			}
-			$('#group-gift').html(giftDrop).select2({
+			$('#group-gift').html(giftDrop).trigger('change')/*select2({
 				//data : data,
 				templateResult: select2Gifts,
 				templateSelection: select2Gifts
-			}).trigger('change')
+			}).*/
 			$('#save-gift-sound').attr('disabled', false)
 			//sendToDb('gifts', 'check', allGifts)
 
@@ -205,9 +208,6 @@ function connect() {
 // These settings are defined by obs.html
 if (!window.settings) window.settings = {};
 
-utterance.addEventListener('boundary', e => {
-	currentCharacter = e.charIndex
-})
 
 Config.updateConfig();
 
@@ -306,6 +306,7 @@ $(document).ready(() => {
 	})
 	$('#vc-on').on('click', () => {
 		voiceComments = 2
+		speechSynthesis.cancel()
 		$('#vc-on').addClass('d-none')
 		$('#vc-off').removeClass('d-none')
 	})
@@ -316,6 +317,7 @@ $(document).ready(() => {
 	})
 	$('#s-on').on('click', () => {
 		playSounds = 2
+		sounds.clearSounds()
 		$('#s-on').addClass('d-none')
 		$('#s-off').removeClass('d-none')
 	})
@@ -394,7 +396,6 @@ $(document).ready(() => {
 //socket.on('readUsernames', (data) => {
 //	console.log(data)
 //})
-
 socket.on('toDoData', (data) => {
 	console.log(data)
 })
@@ -650,7 +651,6 @@ connection.on('questionNew', (data) => {
 	console.log(data)
 	console.log('--- questionNew')
 })
-let battleStats = $('#battleParties')
 connection.on('linkMicBattle', (data) => {
 	//console.log('---- linkMicBattle')
 	//console.log(data)
