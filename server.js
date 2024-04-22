@@ -1,5 +1,4 @@
 require('dotenv').config();
-import { writeFile } from "fs";
 
 const express = require('express');
 const { createServer } = require('http');
@@ -14,7 +13,7 @@ const {google} = require('googleapis');
 
 //! used for finding files in the sounds folder
 
-var fs = require('fs');
+const {fs,writefile} = require('fs');
 
 // setting up google apis
 // https://medium.com/@shkim04/beginner-guide-on-google-sheet-api-for-node-js-4c0b533b071a
@@ -119,13 +118,13 @@ io.on('connection', (socket) => {
     });
 
 
-		socket.on("upload", (file, callback) => {
-			console.log(file); // <Buffer 25 50 44 ...>
-			// save the content to the disk, for example
-			writeFile("sounds/", file, (err) => {
-				console.log({ message: err ? "failure" : "success" });
-			});
-		});
+		//socket.on("upload", (file, callback) => {
+		//	console.log(file); // <Buffer 25 50 44 ...>
+		//	// save the content to the disk, for example
+		//	writeFile("sounds/", file, (err) => {
+		//		console.log({ message: err ? "failure" : "success" });
+		//	});
+		//});
 
     socket.on('disconnect', () => {
         if (tiktokConnectionWrapper) {
