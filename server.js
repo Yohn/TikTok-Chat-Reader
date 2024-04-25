@@ -13,7 +13,8 @@ const {google} = require('googleapis');
 
 //! used for finding files in the sounds folder
 
-const {fs,writefile} = require('fs');
+//const {fs,writefile} = require('fs');
+const fs = require('fs');
 
 // setting up google apis
 // https://medium.com/@shkim04/beginner-guide-on-google-sheet-api-for-node-js-4c0b533b071a
