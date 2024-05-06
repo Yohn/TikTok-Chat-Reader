@@ -457,6 +457,74 @@
         "displayType": "pm_mt_goal_progress_comment",
         "label": "{0:user} subscribed. Subscription goal progress: {1:string}/{2:string}"
       }
+    ],
+    "envelope": [
+      {
+        "userId": "7215390038555935749",
+        "secUid": "MS4wLjABAAAAaRdp5SWQ_7H3hxAKehoENhZt-wu7z1Tm58QHVKYeLfiZBI9nZGUSHMMuprCHxq0x",
+        "uniqueId": "a__bruna",
+        "nickname": "A BRUNA🔥",
+        "profilePictureUrl": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/envelope_comment_avatar.png~tplv-obj.png",
+        "followRole": 0,
+        "userBadges": [],
+        "userSceneTypes": [],
+        "userDetails": {
+          "createTime": "0",
+          "bioDescription": "",
+          "profilePictureUrls": [
+            "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/envelope_comment_avatar.png~tplv-obj.png",
+            "https://p19-webcast.tiktokcdn.com/img/alisg/webcast-sg/envelope_comment_avatar.png~tplv-obj.png"
+          ]
+        },
+        "followInfo": {
+          "followingCount": 4808,
+          "followerCount": 9118,
+          "followStatus": 0,
+          "pushStatus": 0
+        },
+        "isModerator": false,
+        "isNewGifter": false,
+        "isSubscriber": false,
+        "topGifterRank": null,
+        "gifterLevel": 0,
+        "teamMemberLevel": 0,
+        "coins": 120,
+        "canOpen": 80,
+        "timestamp": 1714172137
+      },
+      {
+        "userId": "7215390038555935749",
+        "secUid": "MS4wLjABAAAAaRdp5SWQ_7H3hxAKehoENhZt-wu7z1Tm58QHVKYeLfiZBI9nZGUSHMMuprCHxq0x",
+        "uniqueId": "a__bruna",
+        "nickname": "A BRUNA🔥",
+        "profilePictureUrl": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/envelope_comment_avatar.png~tplv-obj.png",
+        "followRole": 0,
+        "userBadges": [],
+        "userSceneTypes": [],
+        "userDetails": {
+          "createTime": "0",
+          "bioDescription": "",
+          "profilePictureUrls": [
+            "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/envelope_comment_avatar.png~tplv-obj.png",
+            "https://p19-webcast.tiktokcdn.com/img/alisg/webcast-sg/envelope_comment_avatar.png~tplv-obj.png"
+          ]
+        },
+        "followInfo": {
+          "followingCount": 4808,
+          "followerCount": 9120,
+          "followStatus": 0,
+          "pushStatus": 0
+        },
+        "isModerator": false,
+        "isNewGifter": false,
+        "isSubscriber": false,
+        "topGifterRank": null,
+        "gifterLevel": 0,
+        "teamMemberLevel": 0,
+        "coins": 120,
+        "canOpen": 80,
+        "timestamp": 1714172505
+      }
     ]
   }
 }
