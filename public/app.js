@@ -19,7 +19,7 @@ let roomStart = '';
 let roomEnd = '';
 
 let playSounds = 1;
-let saveGifts = 1;
+let saveGifts = 2;
 let voiceComments = 1;
 
 let battleStats = $('#battleParties')
