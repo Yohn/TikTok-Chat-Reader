@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+// thinking about trying to bring some sort of framework in here..
+
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
