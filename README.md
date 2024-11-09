@@ -1,7 +1,20 @@
 # TikTok-Chat-Reader
 A chat reader for <a href="https://www.tiktok.com/live">TikTok LIVE</a> utilizing <a href="https://github.com/zerodytrash/TikTok-Live-Connector">TikTok-Live-Connector</a> and <a href="https://socket.io/">Socket.IO</a> to forward the data to the client. This demo project uses the unofficial TikTok API to retrieve chat comments, gifts and other events from TikTok LIVE.
 
-## Demo: https://tiktok-chat-reader.zerody.one/
+
+# Easy Installation, no host needed!
+> [!TIP]
+> I recently found out about [IDX.Google.com](https://idx.google.com) which can host this package for free, for personal usage.
+
+1. Fork this repo to your account.
+2. Go to [IDX.Google.com](https://idx.google.com) - You'll probably have to sign in or connect your github account.
+3. Open your forked project within the IDX Editor
+4. It will auto launch the on the side like VSCode's built in previewer.
+
+---
+
+## Original Demo: https://tiktok-chat-reader.zerody.one/
+^ That demo does not have the changes I've made. Please use the solution above using [idx.google.com](idx.google.com) to see this repo's capabilities.
 
 ## Installation
 To run the chat reader locally, follow these steps:
@@ -17,6 +30,9 @@ Simply open http://localhost:8091/ in your browser. Thats it.
 
 If you have problems with Node.js, you can also just open the `index.html` from the `public` folder.<br>
 This will use the server backend of the [demo site](https://tiktok-chat-reader.zerody.one/), which is sufficient for testing purposes. If you want to offer it to others or make many connections at the same time, please consider using your own server.
+
+> [!NOTE]
+> I recently found out about [IDX.Google.com](https://idx.google.com) and you're able to fork this repo then open this repo within Google's IDX editor and see this working on the side without needing to download, and without the need for a host, for personal usage. 
 
 ## Yohn's Updates
  - Separated everything away from the chat 
