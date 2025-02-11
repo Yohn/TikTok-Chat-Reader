@@ -21,5 +21,4 @@
     "googleapis": "^74.1.0",
     "socket.io": "^4.7.2",
     "tiktok-live-connector": "^1.2.3"
-  }
-}
+  }}
