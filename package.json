@@ -1,7 +1,7 @@
 {
   "name": "yohns-tiktok-upgrade",
   "homepage": "https://github.com/Yohn/TikTok-Chat-Reader",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "license": "MIT",
   "description": "View TikTok live without actually being there, using zerodytrash's TikTok Live Connector",
   "scripts": {
@@ -20,6 +20,6 @@
     "express": "^4.18.2",
     "googleapis": "^74.1.0",
     "socket.io": "^4.7.2",
-    "tiktok-live-connector": "^1.1.9"
+    "tiktok-live-connector": "^1.2.3"
   }
 }
